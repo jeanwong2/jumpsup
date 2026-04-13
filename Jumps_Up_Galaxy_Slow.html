@@ -1,0 +1,3208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jumps Up</title>
+    <style>
+        :root {
+            --primary: #5D5CDE;
+            --bg-light: #FFFFFF;
+            --bg-dark: #181818;
+            --text-light: #333333;
+            --text-dark: #F0F0F0;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--bg-light);
+            color: var(--text-light);
+            padding: 15px;
+            box-sizing: border-box;
+        }
+
+        .dark body {
+            background-color: var(--bg-dark);
+            color: var(--text-dark);
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            max-width: 650px;
+            height: 100%;
+            max-height: 700px;
+            border: 2px solid var(--primary);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            border-radius: 8px;
+            box-sizing: border-box;
+        }
+
+        /* Welcome Screen / Name Input */
+        #welcome-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-light);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 30;
+        }
+
+        .dark #welcome-screen {
+            background-color: var(--bg-dark);
+        }
+
+        #name-input {
+            font-size: 18px;
+            padding: 10px 15px;
+            width: 250px;
+            margin: 20px 0;
+            border: 2px solid var(--primary);
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        /* Level Selection Screen */
+        #level-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-light);
+            display: none;
+            flex-direction: column;
+            z-index: 10;
+        }
+
+        .dark #level-screen {
+            background-color: var(--bg-dark);
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .level-selection-container {
+            display: flex;
+            height: calc(100% - 80px);
+        }
+
+        .level-grid-container {
+            flex: 7;
+            overflow-y: auto;
+            padding: 0 20px 20px 20px;
+        }
+
+        .shop-container {
+            flex: 3;
+            background-color: rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border-left: 1px solid #ccc;
+            overflow-y: auto; /* Make shop scrollable */
+            max-height: 100%;
+        }
+
+        .dark .shop-container {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-left: 1px solid #444;
+        }
+
+        .shop-title {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 24px;
+            position: sticky;
+            top: 0;
+            background-color: inherit;
+            padding: 5px 0;
+            z-index: 2;
+        }
+
+        .shop-item {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            width: 100%;
+            max-width: 250px;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+
+        .dark .shop-item {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .shop-item:hover:not(.sold-out) {
+            transform: scale(1.05);
+        }
+
+        .shop-item.sold-out {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .shop-item-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .shop-item-description {
+            margin-bottom: 10px;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .shop-item-price {
+            font-weight: bold;
+            color: #FFD700;
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+
+        .shop-item-stock {
+            font-size: 14px;
+            color: #999;
+            margin-bottom: 15px;
+        }
+
+        .buy-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .buy-btn:hover {
+            background-color: #4b4ab8;
+        }
+
+        .buy-btn:disabled {
+            background-color: #999;
+            cursor: not-allowed;
+        }
+
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            padding-bottom: 20px;
+        }
+
+        .level-btn {
+            width: 100%;
+            aspect-ratio: 1/1;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.2s;
+        }
+
+        .level-btn:hover:not(.locked) {
+            transform: scale(1.05);
+        }
+
+        .level-btn.locked {
+            background-color: #888888;
+            cursor: not-allowed;
+            position: relative;
+        }
+
+        .level-btn.locked::after {
+            content: "🔒";
+            font-size: 20px;
+            position: absolute;
+        }
+
+        .level-btn .level-number {
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .level-btn .level-status {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .total-coins {
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 16px;
+        }
+
+        .coin-icon {
+            color: #FFD700;
+            font-size: 20px;
+        }
+
+        /* Game Canvas */
+        #game-canvas {
+            background-color: skyblue;
+        }
+
+        #theme-overlay {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 0.55;
+            background: transparent;
+        }
+
+        #theme-badge {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            z-index: 6;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(0,0,0,0.55);
+            color: #fff;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.3px;
+            text-shadow: 0 1px 2px rgba(0,0,0,0.35);
+            white-space: nowrap;
+        }
+
+        .dark #game-canvas {
+            background-color: #1a3c5e;
+        }
+
+        /* Game UI Elements */
+        #game-ui {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            max-width: 80%;
+            z-index: 5;
+        }
+
+        .ui-element {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 5px 10px;
+            border-radius: 15px;
+            color: white;
+        }
+
+        #ui-timer {
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 24px;
+            font-weight: bold;
+            z-index: 5;
+        }
+
+        #ui-timer.warning {
+            background-color: rgba(255, 0, 0, 0.7);
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.7; }
+            50% { opacity: 1; }
+            100% { opacity: 0.7; }
+        }
+
+        /* UI Top Buttons */
+        #ui-buttons {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 10px;
+            z-index: 15;
+        }
+
+        .ui-btn {
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            padding: 5px 10px;
+            font-size: 16px;
+            cursor: pointer;
+            height: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .ui-btn:hover {
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        #sound-toggle {
+            border-radius: 50%;
+            width: 40px;
+            position: absolute;
+            top: 60px;
+            right: 20px;
+        }
+
+        /* Level Announcement */
+        #level-announcement {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 25;
+            font-size: 48px;
+            font-weight: bold;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.8);
+        }
+
+        /* Game Over Screen */
+        #game-over {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+        }
+
+        #game-over h2 {
+            color: #FF5555;
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        #game-over p {
+            color: white;
+            font-size: 24px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        /* Win Screen */
+        #win-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            text-align: center;
+        }
+
+        #win-screen h2 {
+            color: #FFD700;
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+
+        #win-screen p {
+            color: white;
+            font-size: 24px;
+            margin-bottom: 30px;
+        }
+
+        .game-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin: 10px;
+        }
+
+        .game-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .controls-info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            background-color: rgba(0, 0, 0, 0.5);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 2;
+        }
+
+        /* On-screen controls */
+        #touch-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            right: 0;
+            display: none;
+            justify-content: space-between;
+            z-index: 10;
+            pointer-events: all;
+        }
+
+        #direction-controls {
+            display: flex;
+            margin-left: 20px;
+            pointer-events: auto;
+        }
+
+        #action-controls {
+            display: flex;
+            margin-right: 20px;
+            pointer-events: auto;
+            gap: 10px;
+        }
+
+        .touch-btn {
+            width: 60px;
+            height: 60px;
+            background-color: rgba(255, 255, 255, 0.3);
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 50%;
+            font-size: 24px;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+            margin: 0 5px;
+        }
+
+        .touch-btn:active {
+            background-color: rgba(255, 255, 255, 0.5);
+        }
+
+        .touch-btn#jump-btn {
+            width: 80px;
+            height: 80px;
+            font-size: 28px;
+        }
+
+        .touch-btn#shield-btn {
+            background-color: rgba(93, 92, 222, 0.4);
+            border-color: rgba(93, 92, 222, 0.7);
+        }
+
+        .touch-btn#medicine-btn {
+            background-color: rgba(50, 205, 50, 0.4);
+            border-color: rgba(50, 205, 50, 0.7);
+        }
+
+        .touch-btn#heart-btn {
+            background-color: rgba(255, 105, 180, 0.4);
+            border-color: rgba(255, 105, 180, 0.7);
+        }
+
+        .touch-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .crazy-mode-indicator {
+            position: absolute;
+            top: 10px;
+            right: 150px;
+            background-color: rgba(255, 0, 255, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 16px;
+            animation: rainbow 5s linear infinite;
+            z-index: 5;
+        }
+
+        @keyframes rainbow {
+            0% { background-color: rgba(255, 0, 0, 0.7); }
+            20% { background-color: rgba(255, 165, 0, 0.7); }
+            40% { background-color: rgba(255, 255, 0, 0.7); }
+            60% { background-color: rgba(0, 128, 0, 0.7); }
+            80% { background-color: rgba(0, 0, 255, 0.7); }
+            100% { background-color: rgba(255, 0, 0, 0.7); }
+        }
+
+        @media (max-height: 700px) {
+            .touch-btn {
+                width: 50px;
+                height: 50px;
+            }
+            
+            .touch-btn#jump-btn {
+                width: 70px;
+                height: 70px;
+            }
+            
+            #touch-controls {
+                bottom: 10px;
+            }
+        }
+
+        @media (max-width: 600px) {
+            #game-ui {
+                gap: 4px;
+                top: 8px;
+                left: 8px;
+                max-width: calc(100% - 90px);
+            }
+            .ui-element {
+                padding: 3px 6px;
+                font-size: 12px;
+            }
+            #ui-timer {
+                font-size: 16px;
+                top: 8px;
+                padding: 3px 8px;
+                left: auto;
+                right: 50%;
+                transform: translateX(50%);
+            }
+            #ui-buttons {
+                gap: 4px;
+                top: 8px;
+                right: 8px;
+            }
+            .ui-btn {
+                padding: 3px 6px;
+                font-size: 12px;
+                height: 28px;
+            }
+            #ui-max-lives {
+                display: none; /* Hide max lives on mobile to save space, redundant anyway */
+            }
+        }
+</style>
+</head>
+<body>
+    <div id="game-container">
+        <!-- Welcome Screen with Name Input -->
+        <div id="welcome-screen">
+            <h1>Welcome to Jumps Up!</h1>
+            <p>Enter your name to start playing:</p>
+            <input type="text" id="name-input" maxlength="15" placeholder="Your Name">
+            <button class="game-btn" id="start-btn">Start Game</button>
+        </div>
+        
+        <!-- Level Selection Screen -->
+        <div id="level-screen">
+            <h1>Jumps Up - Level Selection</h1>
+            <div class="total-coins">
+                <span class="coin-icon">$</span>
+                <span id="total-coins-display">0</span>
+            </div>
+            <div class="level-selection-container">
+                <div class="level-grid-container">
+                    <div class="level-grid" id="level-grid">
+                        <!-- Level buttons will be generated here -->
+                    </div>
+                </div>
+                <div class="shop-container">
+                    <div class="shop-title">Shop</div>
+                    <div class="shop-item" id="shop-protector">
+                        <div class="shop-item-title">Protector Shield</div>
+                        <div class="shop-item-description">Protects you from lava once. Press Y or shield button to activate.</div>
+                        <div class="shop-item-price">Price: 2 $</div>
+                        <div class="shop-item-stock">In Stock: <span id="protector-stock">2</span></div>
+                        <button class="buy-btn" id="buy-protector-btn">Buy</button>
+                    </div>
+                    <div class="shop-item" id="shop-medicine">
+                        <div class="shop-item-title">Growth Medicine</div>
+                        <div class="shop-item-description">Makes you 6x larger! Press M or medicine button to use.</div>
+                        <div class="shop-item-price">Price: 5 $</div>
+                        <div class="shop-item-stock">In Stock: <span id="medicine-stock">1</span></div>
+                        <button class="buy-btn" id="buy-medicine-btn">Buy</button>
+                    </div>
+                    <div class="shop-item" id="shop-heart">
+                        <div class="shop-item-title">Extra Heart ❤️</div>
+                        <div class="shop-item-description">Permanently adds one more life to your character.</div>
+                        <div class="shop-item-price">Price: 100 $</div>
+                        <div class="shop-item-stock">In Stock: <span id="heart-stock">3</span></div>
+                        <button class="buy-btn" id="buy-heart-btn">Buy</button>
+                    </div>
+                </div>
+            </div>
+            <button class="ui-btn" id="sound-toggle">🔊</button>
+        </div>
+
+        <canvas id="game-canvas" width="650" height="700"></canvas>
+        <div id="theme-overlay"></div>
+        <div id="theme-badge">Theme</div>
+        
+        <div id="game-ui">
+            <div class="ui-element" id="ui-lives">
+                <span>❤️❤️❤️</span>
+            </div>
+            <div class="ui-element" id="ui-coins">
+                <span>$ 0</span>
+            </div>
+            <div class="ui-element" id="ui-protectors">
+                <span>🛡️ 0</span>
+            </div>
+            <div class="ui-element" id="ui-medicine">
+                <span>💊 0</span>
+            </div>
+            <div class="ui-element" id="ui-max-lives">
+                <span>Max Lives: 3</span>
+            </div>
+        </div>
+
+        <!-- Timer -->
+        <div id="ui-timer">&infin;</div>
+
+        <div id="ui-buttons" class="game-buttons">
+            <button class="ui-btn" id="back-btn">Back</button>
+            <button class="ui-btn" id="sound-toggle-game">🔊</button>
+        </div>
+
+        <div id="level-announcement">
+            Level 1
+        </div>
+
+        <!-- On-screen touch controls -->
+        <div id="touch-controls">
+            <div id="direction-controls">
+                <button class="touch-btn" id="left-btn">←</button>
+                <button class="touch-btn" id="right-btn">→</button>
+            </div>
+            <div id="action-controls">
+                <button class="touch-btn" id="heart-btn">❤️</button>
+                <button class="touch-btn" id="medicine-btn">💊</button>
+                <button class="touch-btn" id="shield-btn">🛡️</button>
+                <button class="touch-btn" id="jump-btn">Z</button>
+            </div>
+        </div>
+
+        <div id="game-over">
+            <h2>Game Over</h2>
+            <p id="game-over-message">You ran out of lives!</p>
+            <button class="game-btn" id="retry-btn">Return to Level Selection</button>
+        </div>
+
+        <div id="win-screen">
+            <h2>Level Complete!</h2>
+            <p id="win-message">You collected the key!</p>
+            <button class="game-btn" id="next-level-btn">Next Level</button>
+            <button class="game-btn" id="return-btn">Return to Level Selection</button>
+        </div>
+
+        <div class="controls-info">
+            Controls: Arrow Keys (←→) to move, Z to jump, Y for shield, M for medicine, H for heart
+        </div>
+
+        <!-- Audio Elements -->
+        <audio id="jump-sound" preload="auto">
+            <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAB9AH0AfQB9AH0AfQB9AH0AfQB9AP//AAA=" type="audio/wav">
+        </audio>
+        <audio id="coin-sound" preload="auto">
+            <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAB/AH8AfwB/AH8AfwB/AH8AfwB/AH8A//8=" type="audio/wav">
+        </audio>
+        <audio id="damage-sound" preload="auto">
+            <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAB8AHwAfAB8AHwAfAB8AHwAfAB8AHwA//8=" type="audio/wav">
+        </audio>
+        <audio id="level-complete-sound" preload="auto">
+            <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAB+AH4AfgB+AH4AfgB+AH4AfgB+AH4A//8=" type="audio/wav">
+        </audio>
+        <audio id="game-over-sound" preload="auto">
+            <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAB7AHsAewB7AHsAewB7AHsAewB7AP//AAA=" type="audio/wav">
+        </audio>
+        <audio id="victory-sound" preload="auto">
+            <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAB5AHkAeQB5AHkAeQB5AHkAeQB5AP//AAA=" type="audio/wav">
+        </audio>
+        <audio id="shield-sound" preload="auto">
+            <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAByAHIAcgByAHIAcgByAHIAcgByAHIA//8=" type="audio/wav">
+        </audio>
+        <audio id="medicine-sound" preload="auto">
+            <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAABwAHAAcABwAHAAcABwAHAAcABwAHAA//8=" type="audio/wav">
+        </audio>
+        <audio id="heart-sound" preload="auto">
+            <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAABuAG4AbgBuAG4AbgBuAG4AbgBuAG4A//8=" type="audio/wav">
+        </audio>
+        <audio id="buy-sound" preload="auto">
+            <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAABxAHEAcQBxAHEAcQBxAHEAcQBxAP//AAA=" type="audio/wav">
+        </audio>
+        <audio id="time-warning-sound" preload="auto">
+            <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAABzAHMAcwBzAHMAcwBzAHMAcwBzAP//AAA=" type="audio/wav">
+        </audio>
+        <audio id="bgm" preload="auto" loop>
+            <source src="data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAB6AHoAegB6AHoAegB6AHoAegB6AP//AAA=" type="audio/wav">
+        </audio>
+    </div>
+
+    <script>
+        // Check for dark mode preference
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+
+        // DOM Elements
+        const gameContainer = document.getElementById('game-container');
+        const welcomeScreen = document.getElementById('welcome-screen');
+        const nameInput = document.getElementById('name-input');
+        const startBtn = document.getElementById('start-btn');
+        const canvas = document.getElementById('game-canvas');
+        const ctx = canvas.getContext('2d');
+        const levelScreen = document.getElementById('level-screen');
+        const levelGrid = document.getElementById('level-grid');
+        const gameUI = document.getElementById('game-ui');
+        const gameOverScreen = document.getElementById('game-over');
+        const winScreen = document.getElementById('win-screen');
+        const retryBtn = document.getElementById('retry-btn');
+        const nextLevelBtn = document.getElementById('next-level-btn');
+        const returnBtn = document.getElementById('return-btn');
+        const backBtn = document.getElementById('back-btn');
+        const uiLives = document.getElementById('ui-lives');
+        const uiMaxLives = document.getElementById('ui-max-lives');
+        const uiCoins = document.getElementById('ui-coins');
+        const uiProtectors = document.getElementById('ui-protectors');
+        const uiMedicine = document.getElementById('ui-medicine');
+        const uiTimer = document.getElementById('ui-timer');
+        const themeOverlay = document.getElementById('theme-overlay');
+        const themeBadge = document.getElementById('theme-badge');
+        const gameOverMessage = document.getElementById('game-over-message');
+        const soundToggle = document.getElementById('sound-toggle');
+        const soundToggleGame = document.getElementById('sound-toggle-game');
+        const totalCoinsDisplay = document.getElementById('total-coins-display');
+        const protectorStockDisplay = document.getElementById('protector-stock');
+        const medicineStockDisplay = document.getElementById('medicine-stock');
+        const heartStockDisplay = document.getElementById('heart-stock');
+        const buyProtectorBtn = document.getElementById('buy-protector-btn');
+        const buyMedicineBtn = document.getElementById('buy-medicine-btn');
+        const buyHeartBtn = document.getElementById('buy-heart-btn');
+        const shopHeartItem = document.getElementById('shop-heart');
+        const levelAnnouncement = document.getElementById('level-announcement');
+        const winMessage = document.getElementById('win-message');
+        const touchControls = document.getElementById('touch-controls');
+        const leftBtn = document.getElementById('left-btn');
+        const rightBtn = document.getElementById('right-btn');
+        const jumpBtn = document.getElementById('jump-btn');
+        const shieldBtn = document.getElementById('shield-btn');
+        const medicineBtn = document.getElementById('medicine-btn');
+        const heartBtn = document.getElementById('heart-btn');
+        const controlsInfo = document.querySelector('.controls-info');
+
+        // Sound Elements
+        const jumpSound = document.getElementById('jump-sound');
+        const coinSound = document.getElementById('coin-sound');
+        const damageSound = document.getElementById('damage-sound');
+        const levelCompleteSound = document.getElementById('level-complete-sound');
+        const gameOverSound = document.getElementById('game-over-sound');
+        const victorySound = document.getElementById('victory-sound');
+        const shieldSound = document.getElementById('shield-sound');
+        const medicineSound = document.getElementById('medicine-sound');
+        const heartSound = document.getElementById('heart-sound');
+        const buySound = document.getElementById('buy-sound');
+        const timeWarningSound = document.getElementById('time-warning-sound');
+        const bgm = document.getElementById('bgm');
+
+        // Create actual sound effects
+        function createSoundEffects() {
+            try {
+                // Create audio context
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                
+                // Create oscillators for each sound
+                createJumpSound(audioCtx);
+                createCoinSound(audioCtx);
+                createDamageSound(audioCtx);
+                createLevelCompleteSound(audioCtx);
+                createGameOverSound(audioCtx);
+                createVictorySound(audioCtx);
+                createShieldSound(audioCtx);
+                createMedicineSound(audioCtx);
+                createHeartSound(audioCtx);
+                createBuySound(audioCtx);
+                createTimeWarningSound(audioCtx);
+                createBackgroundMusic(audioCtx);
+            } catch (e) {
+                console.error("Web Audio API is not supported in this browser");
+            }
+        }
+
+        function createTimeWarningSound(audioCtx) {
+            // Time warning beep
+            const warningBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.2, audioCtx.sampleRate);
+            const warningData = warningBuffer.getChannelData(0);
+            
+            for (let i = 0; i < warningBuffer.length; i++) {
+                const time = i / audioCtx.sampleRate;
+                // Urgent beep sound (440Hz)
+                warningData[i] = Math.sin(2 * Math.PI * 440 * time) * Math.exp(-3 * time);
+            }
+            
+            const warningBlob = bufferToWave(warningBuffer, audioCtx.sampleRate);
+            timeWarningSound.src = URL.createObjectURL(warningBlob);
+        }
+
+        function createHeartSound(audioCtx) {
+            // Heart activation sound - heartbeat
+            const heartBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.6, audioCtx.sampleRate);
+            const heartData = heartBuffer.getChannelData(0);
+            
+            // Create a heartbeat sound (two beats)
+            const firstBeat = Math.floor(heartBuffer.length * 0.25);
+            const secondBeat = Math.floor(heartBuffer.length * 0.65);
+            const beatDuration = Math.floor(heartBuffer.length * 0.15);
+            
+            for (let i = 0; i < heartBuffer.length; i++) {
+                // Create two strong beats
+                if ((i >= firstBeat && i < firstBeat + beatDuration) || 
+                    (i >= secondBeat && i < secondBeat + beatDuration)) {
+                    const time = (i % beatDuration) / audioCtx.sampleRate;
+                    const envelope = 0.8 * Math.exp(-(i % beatDuration) / (beatDuration * 0.3));
+                    heartData[i] = Math.sin(2 * Math.PI * 80 * time) * envelope;
+                } else {
+                    heartData[i] = 0;
+                }
+            }
+            
+            const heartBlob = bufferToWave(heartBuffer, audioCtx.sampleRate);
+            heartSound.src = URL.createObjectURL(heartBlob);
+        }
+
+        function createMedicineSound(audioCtx) {
+            // Medicine activation sound - power up
+            const medicineBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.4, audioCtx.sampleRate);
+            const medicineData = medicineBuffer.getChannelData(0);
+            
+            for (let i = 0; i < medicineBuffer.length; i++) {
+                const time = i / audioCtx.sampleRate;
+                // Rising frequency power-up sound
+                const frequency = 200 + (800 * Math.pow(i / medicineBuffer.length, 2));
+                // Sine wave with bell shape
+                medicineData[i] = Math.sin(2 * Math.PI * frequency * time) * 
+                               Math.sin(Math.PI * i / medicineBuffer.length) * 0.8;
+            }
+            
+            const medicineBlob = bufferToWave(medicineBuffer, audioCtx.sampleRate);
+            medicineSound.src = URL.createObjectURL(medicineBlob);
+        }
+
+        function createJumpSound(audioCtx) {
+            // Jump sound - short upward beep
+            const jumpBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.15, audioCtx.sampleRate);
+            const jumpData = jumpBuffer.getChannelData(0);
+            
+            for (let i = 0; i < jumpBuffer.length; i++) {
+                // Starting frequency - 200Hz, ending at 400Hz
+                const frequency = 200 + (200 * (i / jumpBuffer.length));
+                const time = i / audioCtx.sampleRate;
+                // Sine wave with exponential decay
+                jumpData[i] = Math.sin(2 * Math.PI * frequency * time) * Math.exp(-5 * time);
+            }
+            
+            const jumpBlob = bufferToWave(jumpBuffer, audioCtx.sampleRate);
+            jumpSound.src = URL.createObjectURL(jumpBlob);
+        }
+
+        function createCoinSound(audioCtx) {
+            // Coin sound - higher pitched ding
+            const coinBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.15, audioCtx.sampleRate);
+            const coinData = coinBuffer.getChannelData(0);
+            
+            for (let i = 0; i < coinBuffer.length; i++) {
+                const time = i / audioCtx.sampleRate;
+                // Higher frequency for coin sound (800Hz)
+                coinData[i] = Math.sin(2 * Math.PI * 800 * time) * Math.exp(-10 * time);
+            }
+            
+            const coinBlob = bufferToWave(coinBuffer, audioCtx.sampleRate);
+            coinSound.src = URL.createObjectURL(coinBlob);
+        }
+
+        function createDamageSound(audioCtx) {
+            // Damage sound - lower pitched buzz
+            const damageBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.3, audioCtx.sampleRate);
+            const damageData = damageBuffer.getChannelData(0);
+            
+            for (let i = 0; i < damageBuffer.length; i++) {
+                const time = i / audioCtx.sampleRate;
+                // Lower frequency for damage (100Hz) with some noise
+                damageData[i] = (Math.sin(2 * Math.PI * 100 * time) + Math.random() * 0.3) * Math.exp(-5 * time);
+            }
+            
+            const damageBlob = bufferToWave(damageBuffer, audioCtx.sampleRate);
+            damageSound.src = URL.createObjectURL(damageBlob);
+        }
+
+        function createShieldSound(audioCtx) {
+            // Shield activation sound - swoosh
+            const shieldBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.3, audioCtx.sampleRate);
+            const shieldData = shieldBuffer.getChannelData(0);
+            
+            for (let i = 0; i < shieldBuffer.length; i++) {
+                const time = i / audioCtx.sampleRate;
+                // Rising frequency
+                const frequency = 200 + (500 * (i / shieldBuffer.length));
+                // Sine wave with bell shape
+                shieldData[i] = Math.sin(2 * Math.PI * frequency * time) * 
+                               (Math.sin(Math.PI * i / shieldBuffer.length)) * 0.8;
+            }
+            
+            const shieldBlob = bufferToWave(shieldBuffer, audioCtx.sampleRate);
+            shieldSound.src = URL.createObjectURL(shieldBlob);
+        }
+
+        function createBuySound(audioCtx) {
+            // Buy sound - cash register
+            const buyBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.2, audioCtx.sampleRate);
+            const buyData = buyBuffer.getChannelData(0);
+            
+            for (let i = 0; i < buyBuffer.length; i++) {
+                const time = i / audioCtx.sampleRate;
+                
+                // Coin jingle sound (mixture of high frequencies)
+                if (i < buyBuffer.length / 2) {
+                    buyData[i] = (
+                        Math.sin(2 * Math.PI * 800 * time) * 0.3 +
+                        Math.sin(2 * Math.PI * 1200 * time) * 0.2 +
+                        Math.sin(2 * Math.PI * 1600 * time) * 0.1
+                    ) * Math.exp(-10 * time);
+                } else {
+                    buyData[i] = (
+                        Math.sin(2 * Math.PI * 700 * time) * 0.3 +
+                        Math.sin(2 * Math.PI * 1100 * time) * 0.2 +
+                        Math.sin(2 * Math.PI * 1500 * time) * 0.1
+                    ) * Math.exp(-5 * (time - buyBuffer.length / (2 * audioCtx.sampleRate)));
+                }
+            }
+            
+            const buyBlob = bufferToWave(buyBuffer, audioCtx.sampleRate);
+            buySound.src = URL.createObjectURL(buyBlob);
+        }
+
+        function createLevelCompleteSound(audioCtx) {
+            // Level complete - ascending pattern
+            const completeBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.5, audioCtx.sampleRate);
+            const completeData = completeBuffer.getChannelData(0);
+            
+            const notes = [400, 500, 600, 700, 800];
+            const duration = completeBuffer.length / notes.length;
+            
+            for (let i = 0; i < completeBuffer.length; i++) {
+                const noteIndex = Math.floor(i / duration);
+                const frequency = notes[Math.min(noteIndex, notes.length - 1)];
+                const time = i / audioCtx.sampleRate;
+                completeData[i] = Math.sin(2 * Math.PI * frequency * time) * Math.exp(-2 * time);
+            }
+            
+            const completeBlob = bufferToWave(completeBuffer, audioCtx.sampleRate);
+            levelCompleteSound.src = URL.createObjectURL(completeBlob);
+        }
+
+        function createGameOverSound(audioCtx) {
+            // Game over - descending pattern
+            const gameOverBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 1, audioCtx.sampleRate);
+            const gameOverData = gameOverBuffer.getChannelData(0);
+            
+            const notes = [400, 350, 300, 250, 200, 150];
+            const duration = gameOverBuffer.length / notes.length;
+            
+            for (let i = 0; i < gameOverBuffer.length; i++) {
+                const noteIndex = Math.floor(i / duration);
+                const frequency = notes[Math.min(noteIndex, notes.length - 1)];
+                const time = i / audioCtx.sampleRate;
+                gameOverData[i] = Math.sin(2 * Math.PI * frequency * time) * Math.exp(-1 * time);
+            }
+            
+            const gameOverBlob = bufferToWave(gameOverBuffer, audioCtx.sampleRate);
+            gameOverSound.src = URL.createObjectURL(gameOverBlob);
+        }
+
+        function createVictorySound(audioCtx) {
+            // Victory - more complex fanfare
+            const victoryBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 1.5, audioCtx.sampleRate);
+            const victoryData = victoryBuffer.getChannelData(0);
+            
+            const notes = [400, 400, 400, 500, 600, 600, 700, 800];
+            const durations = [0.1, 0.1, 0.2, 0.15, 0.15, 0.2, 0.2, 0.4];
+            let position = 0;
+            
+            for (let i = 0; i < notes.length; i++) {
+                const samples = Math.floor(durations[i] * audioCtx.sampleRate);
+                const frequency = notes[i];
+                
+                for (let j = 0; j < samples && position < victoryBuffer.length; j++, position++) {
+                    const time = j / audioCtx.sampleRate;
+                    victoryData[position] = Math.sin(2 * Math.PI * frequency * time) * Math.exp(-1 * time);
+                }
+            }
+            
+            const victoryBlob = bufferToWave(victoryBuffer, audioCtx.sampleRate);
+            victorySound.src = URL.createObjectURL(victoryBlob);
+        }
+
+        function createBackgroundMusic(audioCtx) {
+            // Simple looping background music
+            const bgmBuffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 4, audioCtx.sampleRate);
+            const bgmData = bgmBuffer.getChannelData(0);
+            
+            const baseNotes = [262, 294, 330, 349, 392, 440, 494, 523]; // C4 to C5
+            const pattern = [0, 2, 4, 5, 4, 2, 0, 1, 3, 5, 6, 5, 3, 1];
+            const noteDuration = bgmBuffer.length / (pattern.length * 2);
+            
+            for (let i = 0; i < pattern.length; i++) {
+                const noteStart = i * noteDuration * 2;
+                const frequency = baseNotes[pattern[i]];
+                
+                for (let j = 0; j < noteDuration * 1.5 && noteStart + j < bgmBuffer.length; j++) {
+                    const time = j / audioCtx.sampleRate;
+                    // Main melody - sine wave
+                    bgmData[noteStart + j] = 0.3 * Math.sin(2 * Math.PI * frequency * time) * 
+                                            (1 - j / (noteDuration * 1.5)); // Fade out each note
+                    
+                    // Add simple bass line
+                    if (i % 2 === 0 && j < noteDuration * 0.8) {
+                        const bassFreq = baseNotes[Math.floor(i/2) % 4] / 2; // One octave lower
+                        bgmData[noteStart + j] += 0.15 * Math.sin(2 * Math.PI * bassFreq * time);
+                    }
+                }
+            }
+            
+            const bgmBlob = bufferToWave(bgmBuffer, audioCtx.sampleRate);
+            bgm.src = URL.createObjectURL(bgmBlob);
+            bgm.volume = 0.3; // Lower volume for background music
+        }
+
+        // Helper function to convert AudioBuffer to WAV Blob
+        function bufferToWave(abuffer, sampleRate) {
+            const numOfChan = abuffer.numberOfChannels;
+            const length = abuffer.length * numOfChan * 2;
+            const buffer = new ArrayBuffer(44 + length);
+            const view = new DataView(buffer);
+            
+            // Write WAVE header
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + length, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, numOfChan, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2 * numOfChan, true);
+            view.setUint16(32, numOfChan * 2, true);
+            view.setUint16(34, 16, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, length, true);
+            
+            // Write PCM samples
+            const data = new Float32Array(abuffer.getChannelData(0));
+            let offset = 44;
+            for (let i = 0; i < data.length; i++, offset += 2) {
+                const sample = Math.max(-1, Math.min(1, data[i]));
+                view.setInt16(offset, sample < 0 ? sample * 0x8000 : sample * 0x7FFF, true);
+            }
+            
+            return new Blob([buffer], { type: 'audio/wav' });
+        }
+
+        function writeString(view, offset, string) {
+            for (let i = 0; i < string.length; i++) {
+                view.setUint8(offset + i, string.charCodeAt(i));
+            }
+        }
+
+        // Sound state
+        let soundEnabled = true;
+
+        // Toggle sound
+        soundToggle.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
+            soundToggleGame.textContent = soundEnabled ? '🔊' : '🔇';
+            
+            if (soundEnabled) {
+                if (gameState.gameRunning) {
+                    bgm.play();
+                }
+            } else {
+                bgm.pause();
+            }
+        });
+
+        // Toggle sound in-game
+        soundToggleGame.addEventListener('click', () => {
+            soundEnabled = !soundEnabled;
+            soundToggle.textContent = soundEnabled ? '🔊' : '🔇';
+            soundToggleGame.textContent = soundEnabled ? '🔊' : '🔇';
+            
+            if (soundEnabled) {
+                if (gameState.gameRunning) {
+                    bgm.play();
+                }
+            } else {
+                bgm.pause();
+            }
+        });
+
+        // Play sound function
+        function playSound(sound) {
+            if (soundEnabled) {
+                // Reset and play
+                sound.currentTime = 0;
+                sound.play().catch(e => console.log("Error playing sound:", e));
+            }
+        }
+
+        // Game state
+        const gameState = {
+            playerName: "",
+            currentLevel: 0,
+            completedLevels: new Set(),
+            gameRunning: false,
+            lives: 3,
+            maxLives: 3,
+            coins: 0,
+            totalCoins: 0,
+            ownedProtectors: 0,
+            ownedMedicine: 0,
+            ownedHearts: 0,
+            shieldActive: false,
+            medicineActive: false,
+            protectorStock: 2,
+            medicineStock: 1,
+            heartStock: 3, // Heart stock - limited to 3 with no refill
+            levelCoinsCollected: 0,
+            gameInterval: null,
+            animationFrame: null,
+            isMobile: /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent),
+            crazyMode: false, // Secret "dogman" mode flag
+            timeLeft: Infinity, // Unlimited timer
+            timerInterval: null, // Timer interval reference
+            timerWarning: false // Flag for if warning sound has been played
+        };
+
+        // Character
+        const player = {
+            x: 50,
+            y: 350,
+            width: 30,
+            height: 50,
+            velocityX: 0,
+            velocityY: 0,
+            jumping: false,
+            onGround: true,
+            facingRight: true,
+            invulnerable: false,
+            invulnerabilityTimer: 0,
+            sizeMultiplier: 1 // Default size
+        };
+
+        // Level elements
+        const level = {
+            pillars: [],
+            lava: [],
+            coins: [],
+            hearts: [], // Level hearts that can be collected
+            key: null,
+            bigCoin: null,
+            groundLevel: 650, // Adjusted for new canvas height
+            levelWidth: 5000
+        };
+
+        // Game settings
+        const settings = {
+            gravity: 0.5,
+            friction: 0.8,
+            jumpForce: -12,
+            moveSpeed: 5,
+            cameraOffset: 0,
+            totalLevels: 100,
+            baseNumPillars: 20,
+            coinSize: 80,  // 4x bigger (was 20)
+            heartSize: 50, // Size of collectable hearts
+            coinRotationSpeed: 0.03, // Faster rotation
+            medicineGrowthFactor: 6.0, // 600% larger
+            coinFontMultiplier: 3.0  // 300% bigger font for coin numbers
+        };
+
+        // Generate level configurations
+        function generateLevelConfigs() {
+            const configs = [];
+            
+            for (let i = 1; i <= settings.totalLevels; i++) {
+                const numPillars = settings.baseNumPillars + (i - 1) * 2;
+                const lavaCount = Math.floor(Math.random() * 5) + 1; // Random 1-5 lava pools
+                const coinCount = 5;
+                const heartCount = (i % 2 === 0) ? 1 : 0; // Hearts only in even-numbered levels
+                const endType = (i === settings.totalLevels) ? 'bigCoin' : 'key';
+                
+                configs.push({
+                    numPillars,
+                    lavaCount,
+                    coinCount,
+                    heartCount,
+                    endType
+                });
+            }
+            
+            return configs;
+        }
+
+        const levelConfigs = generateLevelConfigs();
+
+        // Input handling
+        const keys = {
+            left: false,
+            right: false,
+            jump: false,
+            shield: false,
+            medicine: false,
+            heart: false,
+            jumpPressed: false, // Track if jump was just pressed
+            shieldPressed: false, // Track if shield was just pressed
+            medicinePressed: false, // Track if medicine was just pressed
+            heartPressed: false // Track if heart was just pressed
+        };
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === ' ' || e.code === 'Space' || e.key.startsWith('Arrow')) e.preventDefault();
+            if (e.key === 'ArrowLeft') keys.left = true;
+            if (e.key === 'ArrowRight') keys.right = true;
+            if (e.key === 'z' || e.key === 'Z' || e.key === ' ' || e.code === 'Space') {
+                if (!keys.jump && !keys.jumpPressed) {
+                    keys.jumpPressed = true; // Mark as just pressed
+                }
+                keys.jump = true;
+            }
+            if (e.key === 'y' || e.key === 'Y') {
+                if (!keys.shield && !keys.shieldPressed && gameState.ownedProtectors > 0 && !gameState.shieldActive) {
+                    keys.shieldPressed = true; // Mark as just pressed
+                }
+                keys.shield = true;
+            }
+            if (e.key === 'm' || e.key === 'M') {
+                if (!keys.medicine && !keys.medicinePressed && gameState.ownedMedicine > 0 && !gameState.medicineActive) {
+                    keys.medicinePressed = true; // Mark as just pressed
+                }
+                keys.medicine = true;
+            }
+            if (e.key === 'h' || e.key === 'H') {
+                if (!keys.heart && !keys.heartPressed && gameState.ownedHearts > 0 && gameState.lives < gameState.maxLives) {
+                    keys.heartPressed = true; // Mark as just pressed
+                }
+                keys.heart = true;
+            }
+        });
+
+        document.addEventListener('keyup', (e) => {
+            if (e.key === 'ArrowLeft') keys.left = false;
+            if (e.key === 'ArrowRight') keys.right = false;
+            if (e.key === 'z' || e.key === 'Z' || e.key === ' ' || e.code === 'Space') {
+                keys.jump = false;
+                keys.jumpPressed = false;
+            }
+            if (e.key === 'y' || e.key === 'Y') {
+                keys.shield = false;
+                keys.shieldPressed = false;
+            }
+            if (e.key === 'm' || e.key === 'M') {
+                keys.medicine = false;
+                keys.medicinePressed = false;
+            }
+            if (e.key === 'h' || e.key === 'H') {
+                keys.heart = false;
+                keys.heartPressed = false;
+            }
+        });
+
+        // Setup touch controls
+        function setupTouchControls() {
+            // Touch controls should only be visible during gameplay
+            touchControls.style.display = 'none';
+            controlsInfo.textContent = "Use on-screen buttons to control";
+
+            // Left button
+            leftBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                keys.left = true;
+            });
+            leftBtn.addEventListener('touchend', () => {
+                keys.left = false;
+            });
+            leftBtn.addEventListener('mousedown', () => {
+                keys.left = true;
+            });
+            leftBtn.addEventListener('mouseup', () => {
+                keys.left = false;
+            });
+            leftBtn.addEventListener('mouseleave', () => {
+                keys.left = false;
+            });
+
+            // Right button
+            rightBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                keys.right = true;
+            });
+            rightBtn.addEventListener('touchend', () => {
+                keys.right = false;
+            });
+            rightBtn.addEventListener('mousedown', () => {
+                keys.right = true;
+            });
+            rightBtn.addEventListener('mouseup', () => {
+                keys.right = false;
+            });
+            rightBtn.addEventListener('mouseleave', () => {
+                keys.right = false;
+            });
+
+            // Jump button
+            jumpBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (!keys.jump) {
+                    keys.jumpPressed = true;
+                }
+                keys.jump = true;
+            });
+            jumpBtn.addEventListener('touchend', () => {
+                keys.jump = false;
+                keys.jumpPressed = false;
+            });
+            jumpBtn.addEventListener('mousedown', () => {
+                if (!keys.jump) {
+                    keys.jumpPressed = true;
+                }
+                keys.jump = true;
+            });
+            jumpBtn.addEventListener('mouseup', () => {
+                keys.jump = false;
+                keys.jumpPressed = false;
+            });
+            jumpBtn.addEventListener('mouseleave', () => {
+                keys.jump = false;
+                keys.jumpPressed = false;
+            });
+
+            // Shield button
+            shieldBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (!keys.shield && !keys.shieldPressed && gameState.ownedProtectors > 0 && !gameState.shieldActive) {
+                    keys.shieldPressed = true;
+                    activateShield();
+                }
+                keys.shield = true;
+            });
+            shieldBtn.addEventListener('touchend', () => {
+                keys.shield = false;
+                keys.shieldPressed = false;
+            });
+            shieldBtn.addEventListener('mousedown', () => {
+                if (!keys.shield && !keys.shieldPressed && gameState.ownedProtectors > 0 && !gameState.shieldActive) {
+                    keys.shieldPressed = true;
+                    activateShield();
+                }
+                keys.shield = true;
+            });
+            shieldBtn.addEventListener('mouseup', () => {
+                keys.shield = false;
+                keys.shieldPressed = false;
+            });
+            shieldBtn.addEventListener('mouseleave', () => {
+                keys.shield = false;
+                keys.shieldPressed = false;
+            });
+
+            // Medicine button
+            medicineBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (!keys.medicine && !keys.medicinePressed && gameState.ownedMedicine > 0 && !gameState.medicineActive) {
+                    keys.medicinePressed = true;
+                    activateMedicine();
+                }
+                keys.medicine = true;
+            });
+            medicineBtn.addEventListener('touchend', () => {
+                keys.medicine = false;
+                keys.medicinePressed = false;
+            });
+            medicineBtn.addEventListener('mousedown', () => {
+                if (!keys.medicine && !keys.medicinePressed && gameState.ownedMedicine > 0 && !gameState.medicineActive) {
+                    keys.medicinePressed = true;
+                    activateMedicine();
+                }
+                keys.medicine = true;
+            });
+            medicineBtn.addEventListener('mouseup', () => {
+                keys.medicine = false;
+                keys.medicinePressed = false;
+            });
+            medicineBtn.addEventListener('mouseleave', () => {
+                keys.medicine = false;
+                keys.medicinePressed = false;
+            });
+
+            // Heart button
+            heartBtn.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                if (!keys.heart && !keys.heartPressed && gameState.ownedHearts > 0 && gameState.lives < gameState.maxLives) {
+                    keys.heartPressed = true;
+                    activateHeart();
+                }
+                keys.heart = true;
+            });
+            heartBtn.addEventListener('touchend', () => {
+                keys.heart = false;
+                keys.heartPressed = false;
+            });
+            heartBtn.addEventListener('mousedown', () => {
+                if (!keys.heart && !keys.heartPressed && gameState.ownedHearts > 0 && gameState.lives < gameState.maxLives) {
+                    keys.heartPressed = true;
+                    activateHeart();
+                }
+                keys.heart = true;
+            });
+            heartBtn.addEventListener('mouseup', () => {
+                keys.heart = false;
+                keys.heartPressed = false;
+            });
+            heartBtn.addEventListener('mouseleave', () => {
+                keys.heart = false;
+                keys.heartPressed = false;
+            });
+        }
+
+        // Update the shield button state
+        function updateShieldButton() {
+            if (gameState.ownedProtectors > 0 && !gameState.shieldActive) {
+                shieldBtn.classList.remove('disabled');
+            } else {
+                shieldBtn.classList.add('disabled');
+            }
+        }
+
+        // Update the medicine button state
+        function updateMedicineButton() {
+            if (gameState.ownedMedicine > 0 && !gameState.medicineActive) {
+                medicineBtn.classList.remove('disabled');
+            } else {
+                medicineBtn.classList.add('disabled');
+            }
+        }
+
+        // Update the heart button state
+        function updateHeartButton() {
+            if (gameState.ownedHearts > 0 && gameState.lives < gameState.maxLives) {
+                heartBtn.classList.remove('disabled');
+            } else {
+                heartBtn.classList.add('disabled');
+            }
+        }
+
+        // Activate shield
+        function activateShield() {
+            if (gameState.ownedProtectors > 0 && !gameState.shieldActive) {
+                gameState.ownedProtectors--;
+                gameState.shieldActive = true;
+                playSound(shieldSound);
+                updateProtectorUI();
+                updateShieldButton();
+            }
+        }
+
+        // Activate medicine
+        function activateMedicine() {
+            if (gameState.ownedMedicine > 0 && !gameState.medicineActive) {
+                gameState.ownedMedicine--;
+                gameState.medicineActive = true;
+                player.sizeMultiplier = settings.medicineGrowthFactor; // Enlarge by 600%
+                playSound(medicineSound);
+                updateMedicineUI();
+                updateMedicineButton();
+            }
+        }
+
+        // Activate heart (use heart item)
+        function activateHeart() {
+            if (gameState.ownedHearts > 0 && gameState.lives < gameState.maxLives) {
+                gameState.ownedHearts--;
+                gameState.lives++; // Add one life
+                playSound(heartSound);
+                updateLivesUI();
+                updateHeartButton();
+            }
+        }
+
+        // Resize canvas to fit container
+        function resizeCanvas() {
+            try {
+                canvas.width = gameContainer.clientWidth;
+                canvas.height = gameContainer.clientHeight;
+                
+                // Update ground level based on canvas height
+                level.groundLevel = canvas.height - 50;
+            } catch (e) {
+                console.log("Resize error: " + e.message);
+            }
+        }
+
+        // Update timer display and check time limit
+        function updateTimer() {
+            if (!gameState.gameRunning || gameState.crazyMode) return;
+            
+            gameState.timeLeft--;
+            uiTimer.textContent = '∞';
+            
+            // Warning when time is running low
+            if (gameState.timeLeft <= 10) {
+                uiTimer.classList.add('warning');
+                
+                // Play warning sound at 10 seconds left if it hasn't already been played
+                if (gameState.timeLeft === 10 && !gameState.timerWarning) {
+                    playSound(timeWarningSound);
+                    gameState.timerWarning = true;
+                }
+            }
+            
+            // Game over when time runs out
+            if (gameState.timeLeft <= 0) {
+                gameOverDueToTime();
+            }
+        }
+
+        // Game over due to time running out
+        function gameOverDueToTime() {
+            gameState.gameRunning = false;
+            
+            // Reset medicine effect if active
+            gameState.medicineActive = false;
+            player.sizeMultiplier = 1;
+            
+            // Play game over sound
+            playSound(gameOverSound);
+            
+            // Stop background music
+            bgm.pause();
+            
+            // Stop timer
+            clearInterval(gameState.timerInterval);
+            
+            if (gameState.gameInterval) {
+                clearInterval(gameState.gameInterval);
+                gameState.gameInterval = null;
+            }
+            
+            if (gameState.animationFrame) {
+                cancelAnimationFrame(gameState.animationFrame);
+                gameState.animationFrame = null;
+            }
+            
+            // Set custom message for time out
+            gameOverMessage.textContent = "Time's up! You ran out of time.";
+            
+            // Hide controls
+            touchControls.style.display = 'none';
+            
+            // Hide game buttons
+            document.querySelector('.game-buttons').style.display = 'none';
+            
+            gameOverScreen.style.display = 'flex';
+        }
+
+        // Check heart shop item status
+        function checkHeartShopStatus() {
+            // Gray out heart shop item if sold out
+            if (gameState.heartStock === 0) {
+                shopHeartItem.classList.add('sold-out');
+                buyHeartBtn.disabled = true;
+            }
+        }
+
+        // Setup Crazy Mode (secret dogman mode)
+        function setupCrazyMode() {
+            // Check if player name is the secret code
+            if (gameState.playerName.toLowerCase() === "dogman") {
+                gameState.crazyMode = true;
+                
+                // Create and add crazy mode indicator
+                const crazyIndicator = document.createElement('div');
+                crazyIndicator.className = 'crazy-mode-indicator';
+                crazyIndicator.textContent = '🐶 CRAZY MODE 🐶';
+                gameContainer.appendChild(crazyIndicator);
+                
+                // Infinite stock for all items
+                updateStockForCrazyMode();
+                
+                // Hide timer since it doesn't apply in crazy mode
+                uiTimer.style.display = 'none';
+            }
+        }
+
+        // Update shop stock for crazy mode
+        function updateStockForCrazyMode() {
+            if (gameState.crazyMode) {
+                // Set displays to show ∞ for infinite stock
+                protectorStockDisplay.textContent = '∞';
+                medicineStockDisplay.textContent = '∞';
+                heartStockDisplay.textContent = '∞';
+                
+                // Ensure none of the shop items appear sold out
+                shopHeartItem.classList.remove('sold-out');
+                buyHeartBtn.disabled = false;
+            }
+        }
+
+        // Initialize shop
+        function initShop() {
+            // Protector Shop Item
+            buyProtectorBtn.addEventListener('click', () => {
+                // Check if player can buy (has enough coins and there's stock)
+                if (gameState.crazyMode || (gameState.totalCoins >= 2 && gameState.protectorStock > 0 && gameState.ownedProtectors < 2)) {
+                    // Purchase protector
+                    if (!gameState.crazyMode) {
+                        gameState.totalCoins -= 2;
+                        gameState.protectorStock--;
+                    }
+                    gameState.ownedProtectors++;
+                    
+                    // Update displays
+                    updateTotalCoinsDisplay();
+                    updateProtectorStock();
+                    updateProtectorUI();
+                    
+                    // Play purchase sound
+                    playSound(buySound);
+                    
+                    // Check if stock is depleted (but not in crazy mode)
+                    if (!gameState.crazyMode && gameState.protectorStock === 0) {
+                        // Refill stock automatically
+                        gameState.protectorStock = 2;
+                        updateProtectorStock();
+                    }
+                }
+            });
+
+            // Medicine Shop Item
+            buyMedicineBtn.addEventListener('click', () => {
+                // Check if player can buy (has enough coins and there's stock)
+                if (gameState.crazyMode || (gameState.totalCoins >= 5 && gameState.medicineStock > 0 && gameState.ownedMedicine < 1)) {
+                    // Purchase medicine
+                    if (!gameState.crazyMode) {
+                        gameState.totalCoins -= 5;
+                        gameState.medicineStock--;
+                    }
+                    gameState.ownedMedicine++;
+                    
+                    // Update displays
+                    updateTotalCoinsDisplay();
+                    updateMedicineStock();
+                    updateMedicineUI();
+                    
+                    // Play purchase sound
+                    playSound(buySound);
+                    
+                    // Check if stock is depleted (but not in crazy mode)
+                    if (!gameState.crazyMode && gameState.medicineStock === 0) {
+                        // Refill stock automatically
+                        gameState.medicineStock = 1;
+                        updateMedicineStock();
+                    }
+                }
+            });
+
+            // Heart Shop Item - permanently increases max hearts
+            buyHeartBtn.addEventListener('click', () => {
+                // Check if player can buy (has enough coins and there's stock)
+                if (gameState.crazyMode || (gameState.totalCoins >= 100 && gameState.heartStock > 0)) {
+                    // Purchase heart - increases max lives
+                    if (!gameState.crazyMode) {
+                        gameState.totalCoins -= 100;
+                        gameState.heartStock--;
+                    }
+                    gameState.maxLives++; // Increase max lives
+                    gameState.lives++; // Also add a life now
+                    
+                    // Update displays
+                    updateTotalCoinsDisplay();
+                    updateHeartStock();
+                    updateLivesUI();
+                    updateMaxLivesUI();
+                    
+                    // Play purchase sound
+                    playSound(heartSound);
+                    
+                    // Check if hearts are sold out (but not in crazy mode)
+                    if (!gameState.crazyMode) {
+                        checkHeartShopStatus();
+                    }
+                }
+            });
+        }
+
+        // Update protector stock display
+        function updateProtectorStock() {
+            if (gameState.crazyMode) {
+                protectorStockDisplay.textContent = '∞';
+                buyProtectorBtn.disabled = false;
+                return;
+            }
+            
+            protectorStockDisplay.textContent = gameState.protectorStock;
+            
+            // Disable button if not enough coins, out of stock, or player already has 2 protectors
+            if (gameState.totalCoins < 2 || gameState.protectorStock === 0 || gameState.ownedProtectors >= 2) {
+                buyProtectorBtn.disabled = true;
+            } else {
+                buyProtectorBtn.disabled = false;
+            }
+        }
+
+        // Update medicine stock display
+        function updateMedicineStock() {
+            if (gameState.crazyMode) {
+                medicineStockDisplay.textContent = '∞';
+                buyMedicineBtn.disabled = false;
+                return;
+            }
+            
+            medicineStockDisplay.textContent = gameState.medicineStock;
+            
+            // Disable button if not enough coins, out of stock, or player already has medicine
+            if (gameState.totalCoins < 5 || gameState.medicineStock === 0 || gameState.ownedMedicine >= 1) {
+                buyMedicineBtn.disabled = true;
+            } else {
+                buyMedicineBtn.disabled = false;
+            }
+        }
+
+        // Update heart stock display
+        function updateHeartStock() {
+            if (gameState.crazyMode) {
+                heartStockDisplay.textContent = '∞';
+                buyHeartBtn.disabled = false;
+                return;
+            }
+            
+            heartStockDisplay.textContent = gameState.heartStock;
+            
+            // Disable button if not enough coins or out of stock
+            if (gameState.totalCoins < 100 || gameState.heartStock === 0) {
+                buyHeartBtn.disabled = true;
+            } else {
+                buyHeartBtn.disabled = false;
+            }
+            
+            // Gray out heart shop item if sold out
+            checkHeartShopStatus();
+        }
+
+        // Initialize name input and start button
+        startBtn.addEventListener('click', () => {
+            const name = nameInput.value.trim();
+            if (name) {
+                gameState.playerName = name;
+                
+                // Check for secret crazy mode
+                setupCrazyMode();
+                
+                welcomeScreen.style.display = 'none';
+                levelScreen.style.display = 'flex';
+                generateLevelButtons();
+            } else {
+                nameInput.classList.add('shake');
+                setTimeout(() => nameInput.classList.remove('shake'), 500);
+            }
+        });
+
+        // Initialize back button
+        backBtn.addEventListener('click', returnToLevelSelection);
+
+        // Initialize retry, next level, and return buttons
+        retryBtn.addEventListener('click', returnToLevelSelection);
+        nextLevelBtn.addEventListener('click', () => {
+            if (gameState.currentLevel < settings.totalLevels) {
+                startLevel(gameState.currentLevel + 1);
+            } else {
+                returnToLevelSelection();
+            }
+        });
+        returnBtn.addEventListener('click', returnToLevelSelection);
+
+        // Generate level buttons
+        function generateLevelButtons() {
+            levelGrid.innerHTML = '';
+            
+            for (let i = 1; i <= settings.totalLevels; i++) {
+                const levelBtn = document.createElement('button');
+                levelBtn.className = 'level-btn';
+                
+                // Only first 3 levels are initially unlocked (or all in crazy mode)
+                if (!gameState.crazyMode && i > 3 && !gameState.completedLevels.has(i - 1)) {
+                    levelBtn.classList.add('locked');
+                }
+                
+                levelBtn.setAttribute('data-level', i);
+                levelBtn.innerHTML = `
+                    <div class="level-number">${i}</div>
+                    <div class="level-status">${gameState.completedLevels.has(i) ? 'Completed' : 'Ready'}</div>
+                `;
+                
+                levelBtn.addEventListener('click', () => {
+                    const levelNum = parseInt(levelBtn.getAttribute('data-level'));
+                    
+                    // Can't play locked levels (unless in crazy mode)
+                    if (!gameState.crazyMode && levelBtn.classList.contains('locked')) {
+                        return;
+                    }
+                    
+                    startLevel(levelNum);
+                });
+                
+                levelGrid.appendChild(levelBtn);
+            }
+            
+            // Update displays
+            updateTotalCoinsDisplay();
+            updateProtectorStock();
+            updateMedicineStock();
+            updateHeartStock();
+        }
+        
+        // Show level announcement
+        function showLevelAnnouncement(levelNum) {
+            levelAnnouncement.textContent = `Level ${levelNum}`;
+            levelAnnouncement.style.display = 'flex';
+            
+            setTimeout(() => {
+                levelAnnouncement.style.display = 'none';
+            }, 2000);
+        }
+
+        // Game functions
+        function startLevel(levelNum) {
+            gameState.currentLevel = levelNum;
+            gameState.lives = gameState.maxLives; // Set lives to max lives when starting level
+            gameState.levelCoinsCollected = 0;
+            gameState.gameRunning = false; // Will be set to true after announcement
+            gameState.timeLeft = Infinity; // Unlimited timer
+            gameState.timerWarning = false; // Reset timer warning flag
+            
+            // Reset timer display
+            uiTimer.textContent = '∞';
+            uiTimer.classList.remove('warning');
+            
+            // Don't reset shield status between levels - it persists unless it gets used
+            // Only reset shieldActive if transitioning from level selection
+            if (!canvas.style.display || canvas.style.display === 'none') {
+                gameState.shieldActive = false;
+                gameState.medicineActive = false;
+                player.sizeMultiplier = 1;
+            }
+
+            // Show/hide timer based on crazy mode
+            uiTimer.style.display = gameState.crazyMode ? 'none' : 'block';
+
+            // Resize canvas first to make sure ground level is correct
+            resizeCanvas();
+
+            // Reset player - now using correct ground level
+            player.x = 50;
+            player.y = level.groundLevel - player.height * player.sizeMultiplier - 10; // Position above ground
+            player.velocityX = 0;
+            player.velocityY = 0;
+            player.jumping = false;
+            player.onGround = true;
+            player.facingRight = true;
+            player.invulnerable = false;
+            player.invulnerabilityTimer = 0;
+
+            // Generate level
+            generateLevel(levelNum);
+
+            // Update UI
+            updateLivesUI();
+            updateMaxLivesUI();
+            updateCoinsUI();
+            updateProtectorUI();
+            updateMedicineUI();
+            updateShieldButton();
+            updateMedicineButton();
+            updateHeartButton();
+
+            // Show game screen
+            levelScreen.style.display = 'none';
+            canvas.style.display = 'block';
+            gameUI.style.display = 'flex';
+            gameOverScreen.style.display = 'none';
+            winScreen.style.display = 'none';
+            document.querySelector('.game-buttons').style.display = 'flex';
+            
+            // Show touch controls only during gameplay
+            touchControls.style.display = 'flex';
+
+            // Show level announcement
+            showLevelAnnouncement(levelNum);
+            
+            // Start game after announcement
+            setTimeout(() => {
+                gameState.gameRunning = true;
+                
+                // Start background music
+                if (soundEnabled) {
+                    bgm.currentTime = 0;
+                    bgm.play().catch(e => console.log("Error playing BGM:", e));
+                }
+                
+                // Start timer if not in crazy mode
+                if (!gameState.crazyMode) {
+                    // Clear any existing timer
+                    if (gameState.timerInterval) {
+                        clearInterval(gameState.timerInterval);
+                    }
+                    gameState.timerInterval = setInterval(updateTimer, 1000);
+                }
+                
+                // Start game loop
+                startGameLoop();
+            }, 2000);
+        }
+
+        function generateLevel(levelNum) {
+            const config = levelConfigs[levelNum - 1];
+            
+            // Clear existing level elements
+            level.pillars = [];
+            level.lava = [];
+            level.coins = [];
+            level.hearts = []; // Clear level hearts
+            level.key = null;
+            level.bigCoin = null;
+            
+            // Set level width
+            level.levelWidth = 5000;
+            
+            // Generate pillars
+            const pillarWidth = 80;
+            const minHeight = 50;
+            const maxHeight = 150;
+            
+            for (let i = 0; i < config.numPillars; i++) {
+                // Distribute pillars across level width
+                const x = 200 + (i * (level.levelWidth - 600) / config.numPillars);
+                const height = minHeight + Math.random() * (maxHeight - minHeight);
+                
+                level.pillars.push({
+                    x,
+                    y: level.groundLevel - height, // Using correct ground level
+                    width: pillarWidth,
+                    height
+                });
+            }
+            
+            // Generate lava pools
+            const lavaWidth = 200;
+            for (let i = 0; i < config.lavaCount; i++) {
+                // Place lava between pillars
+                const lavaPosition = 800 + Math.random() * (level.levelWidth - 1600);
+                
+                level.lava.push({
+                    x: lavaPosition,
+                    y: level.groundLevel - 20, // Using correct ground level
+                    width: lavaWidth,
+                    height: 40,
+                    fireBubbles: Array.from({length: 5}, (_, i) => ({
+                        offsetX: Math.random() * lavaWidth,
+                        offsetY: Math.random() * 5,
+                        speed: 0.5 + Math.random() * 1.5
+                    }))
+                });
+            }
+            
+            // Generate coins - ensure they're not on the same pillar
+            const usedPillars = new Set();
+            let coinCount = 0;
+            
+            // Shuffle the pillars array to randomize coin placement
+            const shuffledPillars = [...level.pillars].sort(() => Math.random() - 0.5);
+            
+            for (let i = 0; i < shuffledPillars.length && coinCount < config.coinCount; i++) {
+                const pillar = shuffledPillars[i];
+                
+                // Check if this pillar has been used
+                if (!usedPillars.has(i)) {
+                    level.coins.push({
+                        x: pillar.x + Math.random() * (pillar.width - settings.coinSize),
+                        y: pillar.y - 30 - Math.random() * 30,
+                        width: settings.coinSize,
+                        height: settings.coinSize,
+                        rotation: 0,
+                        collected: false
+                    });
+                    
+                    // Mark this pillar as used
+                    usedPillars.add(i);
+                    coinCount++;
+                }
+            }
+            
+            // Fill remaining coins if needed on ground
+            while (coinCount < config.coinCount) {
+                // Place coins on ground at safe positions
+                const x = 300 + Math.random() * (level.levelWidth - 600);
+                
+                // Check if position is safe (not over lava or on a pillar)
+                let isSafe = true;
+                for (const lava of level.lava) {
+                    if (x > lava.x - settings.coinSize && x < lava.x + lava.width) {
+                        isSafe = false;
+                        break;
+                    }
+                }
+                
+                if (isSafe) {
+                    level.coins.push({
+                        x: x,
+                        y: level.groundLevel - settings.coinSize - 10,
+                        width: settings.coinSize,
+                        height: settings.coinSize,
+                        rotation: 0,
+                        collected: false
+                    });
+                    coinCount++;
+                }
+            }
+            
+            // Generate hearts in even-numbered levels
+            if (config.heartCount > 0) {
+                // Use a different set of shuffled pillars for heart placement
+                const heartPillars = [...level.pillars].filter(p => !Array.from(usedPillars).some(i => level.pillars[i] === p));
+                heartPillars.sort(() => Math.random() - 0.5);
+                
+                for (let i = 0; i < Math.min(config.heartCount, heartPillars.length); i++) {
+                    const pillar = heartPillars[i];
+                    
+                    level.hearts.push({
+                        x: pillar.x + Math.random() * (pillar.width - settings.heartSize),
+                        y: pillar.y - 30 - Math.random() * 30,
+                        width: settings.heartSize,
+                        height: settings.heartSize,
+                        collected: false,
+                        floatOffset: Math.random() * Math.PI * 2 // Random floating offset
+                    });
+                }
+            }
+            
+            // Generate end goal (key or big coin)
+            if (config.endType === 'key') {
+                level.key = {
+                    x: level.levelWidth - 100,
+                    y: level.groundLevel - 70, // Using correct ground level
+                    width: 30,
+                    height: 30
+                };
+            } else {
+                level.bigCoin = {
+                    x: level.levelWidth - 100,
+                    y: level.groundLevel - 100, // Using correct ground level
+                    width: 120,  // Big coin for final level
+                    height: 120,
+                    rotation: 0
+                };
+            }
+        }
+
+        function startGameLoop() {
+            // Clear any existing game intervals
+            if (gameState.gameInterval) {
+                clearInterval(gameState.gameInterval);
+            }
+            if (gameState.animationFrame) {
+                cancelAnimationFrame(gameState.animationFrame);
+            }
+            
+            // Start game loop
+            gameLoop();
+        }
+
+        function gameLoop() {
+            if (gameState.gameRunning) {
+                updateGame();
+                drawGame();
+                gameState.animationFrame = requestAnimationFrame(gameLoop);
+            }
+        }
+
+        function updateGame() {
+            // Handle player movement
+            if (keys.left) {
+                player.velocityX = -settings.moveSpeed;
+                player.facingRight = false;
+            } else if (keys.right) {
+                player.velocityX = settings.moveSpeed;
+                player.facingRight = true;
+            } else {
+                player.velocityX *= settings.friction;
+            }
+            
+            // Handle jumping
+            if (keys.jump && player.onGround) {
+                player.velocityY = (gameState.currentLevel >= 51 && gameState.currentLevel <= 62) ? settings.jumpForce * 0.75 : settings.jumpForce;
+                player.jumping = true;
+                player.onGround = false;
+
+                // Play jump sound when jumping
+                if (keys.jumpPressed) {
+                    playSound(jumpSound);
+                    keys.jumpPressed = false;
+                }
+            }
+            
+            // Handle shield activation
+            if (keys.shieldPressed && (gameState.ownedProtectors > 0 || gameState.crazyMode) && !gameState.shieldActive) {
+                activateShield();
+                keys.shieldPressed = false;
+            }
+            
+            // Handle medicine activation
+            if (keys.medicinePressed && (gameState.ownedMedicine > 0 || gameState.crazyMode) && !gameState.medicineActive) {
+                activateMedicine();
+                keys.medicinePressed = false;
+            }
+            
+            // Handle heart activation
+            if (keys.heartPressed && (gameState.ownedHearts > 0 || gameState.crazyMode) && gameState.lives < gameState.maxLives) {
+                activateHeart();
+                keys.heartPressed = false;
+            }
+            
+            // Apply gravity
+            player.velocityY += (gameState.currentLevel >= 51 && gameState.currentLevel <= 62) ? settings.gravity * 0.6 : settings.gravity;
+            
+            // Update position
+            player.x += player.velocityX;
+            player.y += player.velocityY;
+            
+            // Prevent going off the left edge
+            if (player.x < 0) {
+                player.x = 0;
+                player.velocityX = 0;
+            }
+            
+            // Prevent going beyond the level width
+            if (player.x + player.width * player.sizeMultiplier > level.levelWidth) {
+                player.x = level.levelWidth - player.width * player.sizeMultiplier;
+                player.velocityX = 0;
+            }
+            
+            // Check ground collision
+            player.onGround = false;
+            if (player.y + player.height * player.sizeMultiplier > level.groundLevel) {
+                player.y = level.groundLevel - player.height * player.sizeMultiplier;
+                player.velocityY = 0;
+                player.onGround = true;
+                player.jumping = false;
+            }
+            
+            // Check pillar collisions
+            for (const pillar of level.pillars) {
+                // Adjust collision for when the player is enlarged
+                const enlargedPlayer = {
+                    x: player.x,
+                    y: player.y,
+                    width: player.width * player.sizeMultiplier,
+                    height: player.height * player.sizeMultiplier
+                };
+                
+                if (checkCollision(enlargedPlayer, pillar) && enlargedPlayer.y + enlargedPlayer.height <= pillar.y + 10) {
+                    player.y = pillar.y - player.height * player.sizeMultiplier;
+                    player.velocityY = 0;
+                    player.onGround = true;
+                    player.jumping = false;
+                }
+            }
+            
+            // Check lava collisions
+            if (!player.invulnerable) {
+                for (const lava of level.lava) {
+                    // Adjust collision for when the player is enlarged
+                    const enlargedPlayer = {
+                        x: player.x,
+                        y: player.y,
+                        width: player.width * player.sizeMultiplier,
+                        height: player.height * player.sizeMultiplier
+                    };
+                    
+                    if (checkCollision(enlargedPlayer, lava)) {
+                        if (gameState.shieldActive) {
+                            // Shield protects from lava
+                            gameState.shieldActive = false;
+                            player.invulnerable = true;
+                            player.invulnerabilityTimer = 60;
+                            player.velocityY = -10; // Bounce up
+                            playSound(shieldSound);
+                            updateShieldButton();
+                            
+                            // In crazy mode, automatically replenish shield
+                            if (gameState.crazyMode) {
+                                gameState.ownedProtectors = 1;
+                                updateProtectorUI();
+                            }
+                        } else {
+                            takeDamage();
+                        }
+                        break;
+                    }
+                }
+            }
+            
+            // Check coin collisions
+            for (const coin of level.coins) {
+                if (!coin.collected) {
+                    // Adjust collision for when the player is enlarged
+                    const enlargedPlayer = {
+                        x: player.x,
+                        y: player.y,
+                        width: player.width * player.sizeMultiplier,
+                        height: player.height * player.sizeMultiplier
+                    };
+                    
+                    if (checkCollision(enlargedPlayer, coin)) {
+                        coin.collected = true;
+                        gameState.levelCoinsCollected++;
+                        gameState.totalCoins += 10; // Each coin is worth 10 points
+                        updateCoinsUI();
+                        updateTotalCoinsDisplay();
+                        playSound(coinSound);
+                        
+                        // Update shop button states
+                        updateProtectorStock();
+                        updateMedicineStock();
+                        updateHeartStock();
+                    }
+                }
+            }
+            
+            // Check heart collisions
+            for (const heart of level.hearts) {
+                if (!heart.collected) {
+                    // Adjust collision for when the player is enlarged
+                    const enlargedPlayer = {
+                        x: player.x,
+                        y: player.y,
+                        width: player.width * player.sizeMultiplier,
+                        height: player.height * player.sizeMultiplier
+                    };
+                    
+                    if (checkCollision(enlargedPlayer, heart)) {
+                        heart.collected = true;
+                        
+                        // If at max lives, give a heart item instead
+                        if (gameState.lives >= gameState.maxLives) {
+                            gameState.ownedHearts++;
+                        } else {
+                            gameState.lives++; // Add one life
+                            updateLivesUI();
+                        }
+                        
+                        updateHeartButton();
+                        playSound(heartSound);
+                    }
+                }
+            }
+            
+            // Rotate coins
+            for (const coin of level.coins) {
+                if (!coin.collected) {
+                    coin.rotation += settings.coinRotationSpeed;
+                }
+            }
+            
+            // Update floating hearts
+            for (const heart of level.hearts) {
+                if (!heart.collected) {
+                    heart.floatOffset += 0.02;
+                }
+            }
+            
+            // Rotate big coin if present
+            if (level.bigCoin) {
+                level.bigCoin.rotation += settings.coinRotationSpeed;
+            }
+            
+            // Check key/big coin collision
+            if (level.key) {
+                // Adjust collision for when the player is enlarged
+                const enlargedPlayer = {
+                    x: player.x,
+                    y: player.y,
+                    width: player.width * player.sizeMultiplier,
+                    height: player.height * player.sizeMultiplier
+                };
+                
+                if (checkCollision(enlargedPlayer, level.key)) {
+                    levelComplete();
+                }
+            }
+            
+            if (level.bigCoin) {
+                // Adjust collision for when the player is enlarged
+                const enlargedPlayer = {
+                    x: player.x,
+                    y: player.y,
+                    width: player.width * player.sizeMultiplier,
+                    height: player.height * player.sizeMultiplier
+                };
+                
+                if (checkCollision(enlargedPlayer, level.bigCoin)) {
+                    gameWon();
+                }
+            }
+            
+            // Update invulnerability timer
+            if (player.invulnerable) {
+                player.invulnerabilityTimer--;
+                if (player.invulnerabilityTimer <= 0) {
+                    player.invulnerable = false;
+                }
+            }
+            
+            // Update camera offset based on player's size
+            const playerCenter = player.x + (player.width * player.sizeMultiplier) / 2;
+            settings.cameraOffset = Math.max(0, playerCenter - canvas.width / 2);
+            if (settings.cameraOffset > level.levelWidth - canvas.width) {
+                settings.cameraOffset = level.levelWidth - canvas.width;
+            }
+            
+            // Update lava fire animations
+            for (const lava of level.lava) {
+                for (const fire of lava.fireBubbles) {
+                    fire.offsetY = Math.sin(Date.now() / (1000 / fire.speed)) * 10;
+                }
+            }
+            
+            // In crazy mode, replenish items automatically
+            if (gameState.crazyMode) {
+                if (gameState.medicineActive === false && gameState.ownedMedicine === 0) {
+                    gameState.ownedMedicine = 1;
+                    updateMedicineUI();
+                    updateMedicineButton();
+                }
+                
+                if (gameState.lives < gameState.maxLives && gameState.ownedHearts === 0) {
+                    gameState.ownedHearts = 1;
+                    updateHeartButton();
+                }
+            }
+        }
+
+        
+        function getLevelTheme(levelNum) {
+            if (levelNum >= 1 && levelNum <= 8) {
+                return {
+                    name: 'Angry Birds style',
+                    sky: 'linear-gradient(to bottom, #8fd3ff 0%, #dff5ff 100%)',
+                    ground: '#88c057', groundDark: '#5f8d3d', pillar: '#c78752', pillarDark: '#8e5e37',
+                    overlay: 'radial-gradient(circle at 12% 18%, rgba(255,255,255,0.35) 0 70px, transparent 72px), radial-gradient(circle at 85% 20%, rgba(255,255,255,0.9) 0 18px, transparent 20px), radial-gradient(circle at 90% 24%, rgba(255,255,255,0.9) 0 24px, transparent 26px), linear-gradient(to top, rgba(106,168,79,0.25), rgba(0,0,0,0))'
+                };
+            }
+            if (levelNum >= 9 && levelNum <= 17) {
+                return {
+                    name: 'Township style',
+                    sky: 'linear-gradient(to bottom, #88d7ff 0%, #f3fbff 100%)',
+                    ground: '#8f9399', groundDark: '#5f646b', pillar: '#d9b27c', pillarDark: '#9f7b4c',
+                    overlay: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0 24px, rgba(0,0,0,0.02) 24px 48px), linear-gradient(to top, rgba(255,210,120,0.18), rgba(0,0,0,0))'
+                };
+            }
+            if (levelNum >= 18 && levelNum <= 24) {
+                return {
+                    name: 'Island adventure style',
+                    sky: 'linear-gradient(to bottom, #4cc9f0 0%, #b9f3ff 55%, #ffe8aa 100%)',
+                    ground: '#e0be6d', groundDark: '#aa7f39', pillar: '#6fb98f', pillarDark: '#3f7d5d',
+                    overlay: 'radial-gradient(circle at 18% 22%, rgba(255,235,140,0.42) 0 62px, transparent 64px), repeating-linear-gradient(135deg, rgba(255,255,255,0.07) 0 12px, rgba(0,0,0,0) 12px 24px)'
+                };
+            }
+            if (levelNum >= 25 && levelNum <= 36) {
+                return {
+                    name: 'Block world style',
+                    sky: 'linear-gradient(to bottom, #7cc7ff 0%, #d8f0ff 100%)',
+                    ground: '#7dbb4c', groundDark: '#4e7f2d', pillar: '#9f7b56', pillarDark: '#6c5239',
+                    overlay: 'repeating-linear-gradient(0deg, rgba(255,255,255,0.06) 0 22px, rgba(0,0,0,0.02) 22px 24px), repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0 22px, rgba(0,0,0,0.02) 22px 24px)'
+                };
+            }
+            if (levelNum >= 37 && levelNum <= 40) {
+                return {
+                    name: 'Roblox style',
+                    sky: 'linear-gradient(to bottom, #cfd6df 0%, #eef2f7 100%)',
+                    ground: '#aeb7c2', groundDark: '#7b8794', pillar: '#f3f4f6', pillarDark: '#c9cdd4',
+                    overlay: 'repeating-linear-gradient(45deg, rgba(255,255,255,0.12) 0 14px, rgba(0,0,0,0.03) 14px 28px)'
+                };
+            }
+            if (levelNum >= 41 && levelNum <= 47) {
+                return {
+                    name: 'Mario style',
+                    sky: 'linear-gradient(to bottom, #5db7ff 0%, #dff7ff 100%)',
+                    ground: '#7cc84a', groundDark: '#4f8f28', pillar: '#c47a43', pillarDark: '#8a532d',
+                    overlay: 'radial-gradient(circle at 14% 20%, rgba(255,255,255,0.95) 0 26px, transparent 28px), radial-gradient(circle at 22% 22%, rgba(255,255,255,0.95) 0 34px, transparent 36px), radial-gradient(circle at 82% 18%, rgba(255,255,255,0.95) 0 22px, transparent 24px)'
+                };
+            }
+            if (levelNum >= 48 && levelNum <= 50) {
+                return {
+                    name: 'Lego style',
+                    sky: 'linear-gradient(to bottom, #ffd34d 0%, #fff1b3 100%)',
+                    ground: '#ff595e', groundDark: '#c63f43', pillar: '#ffca3a', pillarDark: '#d69f12',
+                    overlay: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.08) 0 30px, rgba(0,0,0,0.03) 30px 60px), repeating-linear-gradient(0deg, rgba(255,255,255,0.08) 0 30px, rgba(0,0,0,0.03) 30px 60px)'
+                };
+            }
+            if (levelNum >= 51 && levelNum <= 62) {
+                return {
+                    name: 'Galaxy style',
+                    sky: 'linear-gradient(to bottom, #050816 0%, #1b1f5c 50%, #3b1464 100%)',
+                    ground: '#453c7a', groundDark: '#2a2552', pillar: '#8b7cff', pillarDark: '#5f56b5',
+                    overlay: 'radial-gradient(circle at 20% 25%, rgba(255,255,255,0.95) 0 1px, transparent 2px), radial-gradient(circle at 35% 40%, rgba(255,255,255,0.8) 0 1.5px, transparent 3px), radial-gradient(circle at 75% 20%, rgba(255,255,255,0.9) 0 1px, transparent 2px), radial-gradient(circle at 60% 65%, rgba(120,200,255,0.35) 0 80px, transparent 140px), radial-gradient(circle at 80% 30%, rgba(255,120,220,0.18) 0 110px, transparent 170px)'
+                };
+            }
+            if (levelNum >= 63 && levelNum <= 70) {
+                return {
+                    name: 'Fortnite-like style',
+                    sky: 'linear-gradient(to bottom, #56ccf2 0%, #2f80ed 100%)',
+                    ground: '#7bc96f', groundDark: '#4d8d44', pillar: '#9b6a3d', pillarDark: '#6d4728',
+                    overlay: 'linear-gradient(to top, rgba(255,255,255,0.08), rgba(0,0,0,0)), radial-gradient(circle at 82% 18%, rgba(255,255,255,0.65) 0 28px, transparent 30px)'
+                };
+            }
+            if (levelNum >= 71 && levelNum <= 84) {
+                return {
+                    name: 'Taco style',
+                    sky: 'linear-gradient(to bottom, #ffd166 0%, #fff3bf 100%)',
+                    ground: '#d08c3f', groundDark: '#8f5b21', pillar: '#8ccf5f', pillarDark: '#5e9639',
+                    overlay: 'repeating-radial-gradient(circle at 20% 20%, rgba(255,99,71,0.16) 0 6px, transparent 6px 28px), repeating-radial-gradient(circle at 70% 40%, rgba(76,175,80,0.16) 0 5px, transparent 5px 24px), linear-gradient(to top, rgba(255,235,59,0.08), rgba(0,0,0,0))'
+                };
+            }
+            if (levelNum >= 85 && levelNum <= 91) {
+                return {
+                    name: 'Zootopia style',
+                    sky: 'linear-gradient(to bottom, #b7e4f9 0%, #eef9ff 100%)',
+                    ground: '#9aa0a6', groundDark: '#62676d', pillar: '#c9b79c', pillarDark: '#8b7b63',
+                    overlay: 'repeating-linear-gradient(90deg, rgba(255,255,255,0.06) 0 18px, rgba(0,0,0,0.02) 18px 36px), linear-gradient(to top, rgba(120,120,120,0.12), rgba(0,0,0,0))'
+                };
+            }
+            return {
+                name: 'Jumps Up style',
+                sky: 'linear-gradient(to bottom, #87ceeb 0%, #dff6ff 100%)',
+                ground: '#8CC152', groundDark: '#3a6b3a', pillar: '#967A4D', pillarDark: '#5f4b32',
+                overlay: 'radial-gradient(circle at 15% 20%, rgba(255,255,255,0.55) 0 40px, transparent 42px), linear-gradient(to top, rgba(93,92,222,0.08), rgba(0,0,0,0))'
+            };
+        }
+
+function drawGame() {
+            const theme = getLevelTheme(gameState.currentLevel || 1);
+            canvas.style.background = theme.sky;
+            if (themeOverlay) {
+                themeOverlay.style.background = theme.overlay;
+            }
+            if (themeBadge) {
+                themeBadge.textContent = theme.name;
+            }
+
+            // Clear canvas
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw ground
+            ctx.fillStyle = isDarkMode() ? theme.groundDark : theme.ground;
+            ctx.fillRect(0, level.groundLevel, canvas.width, canvas.height - level.groundLevel);
+
+            // Draw pillars
+            for (const pillar of level.pillars) {
+                if (pillar.x + pillar.width >= settings.cameraOffset && 
+                    pillar.x <= settings.cameraOffset + canvas.width) {
+                    const px = pillar.x - settings.cameraOffset;
+                    if (gameState.currentLevel >= 9 && gameState.currentLevel <= 17) {
+                        const buildingColors = isDarkMode()
+                            ? ['#8d6e63', '#607d8b', '#6d7d46', '#7b5e57']
+                            : ['#d7a86e', '#9ec1cf', '#b8cf8a', '#d8b4a0'];
+                        const bodyColor = buildingColors[Math.abs(Math.floor(pillar.x / 80)) % buildingColors.length];
+                        const roofColor = isDarkMode() ? '#4e342e' : '#a0472d';
+                        const windowColor = isDarkMode() ? '#ffe082' : '#eaf6ff';
+                        const doorColor = isDarkMode() ? '#3e2723' : '#704f37';
+                        const trimColor = isDarkMode() ? '#d7ccc8' : '#fff8ef';
+                        const w = pillar.width;
+                        const topY = pillar.y;
+                        const bottomY = level.groundLevel;
+                        const totalH = Math.max(50, bottomY - topY);
+                        const roofH = Math.min(18, Math.max(10, totalH * 0.12));
+                        const bodyY = topY + roofH;
+                        const bodyH = Math.max(28, totalH - roofH);
+                        const overLava = level.lava.some(lava => pillar.x < lava.x + lava.width && pillar.x + pillar.width > lava.x);
+
+                        ctx.fillStyle = bodyColor;
+                        ctx.fillRect(px, bodyY, w, bodyH);
+
+                        ctx.fillStyle = roofColor;
+                        if ((Math.floor(pillar.x / 100) % 3) === 0) {
+                            ctx.beginPath();
+                            ctx.moveTo(px - 4, bodyY + 2);
+                            ctx.lineTo(px + w / 2, topY - 4);
+                            ctx.lineTo(px + w + 4, bodyY + 2);
+                            ctx.closePath();
+                            ctx.fill();
+                        } else {
+                            ctx.fillRect(px - 2, topY, w + 4, roofH + 4);
+                        }
+
+                        ctx.strokeStyle = trimColor;
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(px + 1, bodyY + 1, w - 2, bodyH - 2);
+
+                        const floors = Math.max(1, Math.min(8, Math.floor((bodyH - 20) / 22)));
+                        const cols = w >= 72 ? 2 : 1;
+                        const winW = cols === 2 ? 12 : 16;
+                        const winH = 12;
+                        const xGap = cols === 2 ? (w - (cols * winW)) / 3 : (w - winW) / 2;
+                        for (let row = 0; row < floors; row++) {
+                            const wy = bodyY + 8 + row * 20;
+                            if (wy + winH > bodyY + bodyH - 22) break;
+                            for (let col = 0; col < cols; col++) {
+                                const wx = cols === 2 ? px + xGap + col * (winW + xGap) : px + xGap;
+                                ctx.fillStyle = windowColor;
+                                ctx.fillRect(wx, wy, winW, winH);
+                                ctx.strokeStyle = 'rgba(0,0,0,0.15)';
+                                ctx.lineWidth = 1;
+                                ctx.strokeRect(wx, wy, winW, winH);
+                            }
+                        }
+
+                        const doorW = 14;
+                        const doorH = 18;
+                        ctx.fillStyle = doorColor;
+                        ctx.fillRect(px + (w - doorW) / 2, bodyY + bodyH - doorH, doorW, doorH);
+
+                        if (overLava) {
+                            ctx.font = '18px Arial';
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            const flames = Math.max(2, Math.floor(w / 24));
+                            for (let i = 0; i < flames; i++) {
+                                const fx = px + (i + 0.5) * (w / flames);
+                                const fy = bodyY + 12 + Math.sin(Date.now() / 180 + i) * 4;
+                                ctx.fillText('🔥', fx, fy);
+                            }
+                        }
+                    } else {
+                        ctx.fillStyle = isDarkMode() ? theme.pillarDark : theme.pillar;
+                        ctx.fillRect(px, pillar.y, pillar.width, pillar.height);
+                    }
+                }
+            }
+
+            // Draw lava with fire emoji// Draw lava with fire emoji
+            ctx.fillStyle = '#FF5555';
+            for (const lava of level.lava) {
+                if (lava.x + lava.width >= settings.cameraOffset && 
+                    lava.x <= settings.cameraOffset + canvas.width) {
+                    // Draw lava base
+                    ctx.fillRect(
+                        lava.x - settings.cameraOffset,
+                        lava.y,
+                        lava.width,
+                        lava.height
+                    );
+                    
+                    // Draw fire emoji bubbles instead of circles
+                    ctx.font = '20px Arial';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    
+                    for (const fire of lava.fireBubbles) {
+                        const fireX = lava.x + fire.offsetX;
+                        const fireY = lava.y - fire.offsetY - 5;
+                        
+                        if (fireX >= settings.cameraOffset && fireX <= settings.cameraOffset + canvas.width) {
+                            ctx.fillText(
+                                '🔥',
+                                fireX - settings.cameraOffset,
+                                fireY
+                            );
+                        }
+                    }
+                }
+            }
+            
+            // Draw coins - now with horizontal spin
+            for (const coin of level.coins) {
+                if (!coin.collected && 
+                    coin.x + coin.width >= settings.cameraOffset && 
+                    coin.x <= settings.cameraOffset + canvas.width) {
+                    
+                    // Save the context state
+                    ctx.save();
+                    
+                    // Translate to the center of the coin
+                    ctx.translate(
+                        coin.x + coin.width / 2 - settings.cameraOffset,
+                        coin.y + coin.height / 2 + Math.sin(Date.now() / 300) * 5
+                    );
+                    
+                    // Draw coin circle with horizontal spin effect
+                    ctx.fillStyle = '#FFD700';
+                    ctx.beginPath();
+                    // Use Math.abs(Math.cos) to create a horizontal spinning effect
+                    const coinWidth = coin.width * Math.abs(Math.cos(coin.rotation));
+                    ctx.ellipse(0, 0, coinWidth / 2, coin.height / 2, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Add shine/highlight if visible from front
+                    if (Math.cos(coin.rotation) > 0.3) {
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                        ctx.beginPath();
+                        ctx.ellipse(-coinWidth/6, -coin.height/6, coinWidth/6, coin.height/8, Math.PI/4, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    
+                    // Draw "$" inside the coin, only when visible from the front
+                    if (Math.abs(Math.cos(coin.rotation)) > 0.7) {
+                        ctx.fillStyle = '#000';
+                        // 300% bigger font
+                        const fontSize = coin.width * Math.abs(Math.cos(coin.rotation)) / 3 * settings.coinFontMultiplier;
+                        ctx.font = `${fontSize}px Arial`;
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'middle';
+                        ctx.fillText('$', 0, 0);
+                    }
+                    
+                    // Restore the context
+                    ctx.restore();
+                }
+            }
+            
+            // Draw hearts
+            for (const heart of level.hearts) {
+                if (!heart.collected && 
+                    heart.x + heart.width >= settings.cameraOffset && 
+                    heart.x <= settings.cameraOffset + canvas.width) {
+                    
+                    // Draw floating heart
+                    ctx.font = `${heart.width}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    
+                    // Make the heart float using sin function
+                    const floatY = Math.sin(heart.floatOffset) * 10;
+                    
+                    ctx.fillText(
+                        '❤️',
+                        heart.x + heart.width / 2 - settings.cameraOffset,
+                        heart.y + heart.height / 2 + floatY
+                    );
+                }
+            }
+            
+            // Draw key
+            if (level.key && 
+                level.key.x + level.key.width >= settings.cameraOffset && 
+                level.key.x <= settings.cameraOffset + canvas.width) {
+                ctx.fillStyle = '#FFD700';
+                ctx.beginPath();
+                ctx.arc(
+                    level.key.x + level.key.width / 2 - settings.cameraOffset,
+                    level.key.y + level.key.height / 2,
+                    level.key.width / 2,
+                    0,
+                    Math.PI * 2
+                );
+                ctx.fill();
+                ctx.fillRect(
+                    level.key.x + level.key.width / 2 - 5 - settings.cameraOffset,
+                    level.key.y + level.key.height - 5,
+                    10,
+                    15
+                );
+                ctx.fillRect(
+                    level.key.x + level.key.width / 2 - 10 - settings.cameraOffset,
+                    level.key.y + level.key.height + 5,
+                    20,
+                    5
+                );
+            }
+            
+            // Draw big coin (for final level) - now with horizontal spin
+            if (level.bigCoin && 
+                level.bigCoin.x + level.bigCoin.width >= settings.cameraOffset && 
+                level.bigCoin.x <= settings.cameraOffset + canvas.width) {
+                
+                // Save the context state
+                ctx.save();
+                
+                // Translate to the center of the coin
+                ctx.translate(
+                    level.bigCoin.x + level.bigCoin.width / 2 - settings.cameraOffset,
+                    level.bigCoin.y + level.bigCoin.height / 2 + Math.sin(Date.now() / 300) * 8
+                );
+                
+                // Draw big coin circle with horizontal spin effect
+                ctx.fillStyle = '#FFD700';
+                ctx.beginPath();
+                // Use Math.abs(Math.cos) to create a horizontal spinning effect
+                const coinWidth = level.bigCoin.width * Math.abs(Math.cos(level.bigCoin.rotation));
+                ctx.ellipse(0, 0, coinWidth / 2, level.bigCoin.height / 2, 0, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Add shine to the big coin if visible from front
+                if (Math.cos(level.bigCoin.rotation) > 0.3) {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+                    ctx.beginPath();
+                    ctx.ellipse(-coinWidth/6, -level.bigCoin.height/6, coinWidth/6, level.bigCoin.height/8, Math.PI/4, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                
+                // Draw "$" inside the big coin, only when visible from the front
+                if (Math.abs(Math.cos(level.bigCoin.rotation)) > 0.7) {
+                    ctx.fillStyle = '#000';
+                    // 300% bigger font
+                    const fontSize = level.bigCoin.width * Math.abs(Math.cos(level.bigCoin.rotation)) / 3 * settings.coinFontMultiplier;
+                    ctx.font = `${fontSize}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText('$', 0, 0);
+                }
+                
+                // Restore the context
+                ctx.restore();
+            }
+            
+            // Draw player (match man)
+            // Don't draw if invulnerable and blinking
+            if (!player.invulnerable || Math.floor(Date.now() / 100) % 2 === 0) {
+                if (gameState.shieldActive) {
+                    const shieldSize = player.width * player.sizeMultiplier * 0.8;
+                    ctx.fillStyle = 'rgba(93, 92, 222, 0.3)';
+                    ctx.strokeStyle = 'rgba(93, 92, 222, 0.8)';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(
+                        player.x + (player.width * player.sizeMultiplier) / 2 - settings.cameraOffset,
+                        player.y + (player.height * player.sizeMultiplier) / 2,
+                        shieldSize,
+                        0,
+                        Math.PI * 2
+                    );
+                    ctx.fill();
+                    ctx.stroke();
+                }
+
+                const scaledWidth = player.width * player.sizeMultiplier;
+                const scaledHeight = player.height * player.sizeMultiplier;
+                const centerX = player.x + scaledWidth / 2 - settings.cameraOffset;
+                const centerY = player.y + scaledHeight * 0.52;
+                const headRadius = 10 * player.sizeMultiplier;
+
+                ctx.fillStyle = '#FFF';
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.font = `${14 * Math.sqrt(player.sizeMultiplier)}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.strokeText(gameState.playerName, centerX, player.y - 10 * player.sizeMultiplier);
+                ctx.fillText(gameState.playerName, centerX, player.y - 10 * player.sizeMultiplier);
+
+                if (gameState.crazyMode) {
+                    ctx.font = `${16 * Math.sqrt(player.sizeMultiplier)}px Arial`;
+                    ctx.fillText('👑', centerX, player.y - 25 * player.sizeMultiplier);
+                }
+
+                const moving = Math.abs(player.velocityX) > 0.5;
+                const armSwing = moving ? Math.sin(Date.now() / 120) * (Math.PI / 6) : 0;
+                const legSwing = moving ? Math.sin(Date.now() / 120) * 6 * player.sizeMultiplier : 0;
+                const bodyTilt = 0;
+                const limbLength = 15 * player.sizeMultiplier;
+                const legLength = 10 * player.sizeMultiplier;
+                const shoulderY = -scaledHeight * 0.03;
+                const hipY = scaledHeight * 0.18;
+
+                ctx.save();
+                ctx.translate(centerX, centerY);
+                ctx.rotate(bodyTilt);
+                ctx.strokeStyle = '#000';
+                ctx.fillStyle = '#000';
+                ctx.lineWidth = 2 * player.sizeMultiplier;
+
+                ctx.beginPath();
+                ctx.arc(0, -scaledHeight * 0.33, headRadius, 0, Math.PI * 2);
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.moveTo(0, -scaledHeight * 0.15);
+                ctx.lineTo(0, scaledHeight * 0.18);
+                ctx.stroke();
+
+                const leftArmAngle = Math.PI + armSwing;
+                const rightArmAngle = -armSwing;
+                ctx.beginPath();
+                ctx.moveTo(0, shoulderY);
+                ctx.lineTo(Math.cos(leftArmAngle) * limbLength, shoulderY + Math.sin(leftArmAngle) * limbLength);
+                ctx.moveTo(0, shoulderY);
+                ctx.lineTo(Math.cos(rightArmAngle) * limbLength, shoulderY + Math.sin(rightArmAngle) * limbLength);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(0, hipY);
+                if (player.jumping) {
+                    ctx.lineTo(-legLength, hipY + legLength);
+                    ctx.moveTo(0, hipY);
+                    ctx.lineTo(legLength, hipY + legLength);
+                } else if (moving) {
+                    ctx.lineTo(-legLength, hipY + legLength + legSwing);
+                    ctx.moveTo(0, hipY);
+                    ctx.lineTo(legLength, hipY + legLength - legSwing);
+                } else {
+                    ctx.lineTo(-legLength, hipY + legLength);
+                    ctx.moveTo(0, hipY);
+                    ctx.lineTo(legLength, hipY + legLength);
+                }
+                ctx.stroke();
+
+                const eyeOffsetX = player.facingRight ? 3 * player.sizeMultiplier : -3 * player.sizeMultiplier;
+                ctx.fillStyle = '#FFF';
+                ctx.beginPath();
+                ctx.arc(eyeOffsetX, -scaledHeight * 0.36, 2 * player.sizeMultiplier, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+
+        }
+
+        // Helper function to check collision between two rectangles
+        function checkCollision(rect1, rect2) {
+            return (
+                rect1.x < rect2.x + rect2.width &&
+                rect1.x + rect1.width > rect2.x &&
+                rect1.y < rect2.y + rect2.height &&
+                rect1.y + rect1.height > rect2.y
+            );
+        }
+
+        // Handle player taking damage
+        function takeDamage() {
+            // In crazy mode, the player never takes damage
+            if (player.invulnerable || gameState.crazyMode) return;
+            
+            gameState.lives--;
+            updateLivesUI();
+            
+            // Play damage sound
+            playSound(damageSound);
+            
+            if (gameState.lives <= 0) {
+                gameOver();
+                return;
+            }
+            
+            // Make player invulnerable for a short time
+            player.invulnerable = true;
+            player.invulnerabilityTimer = 60; // frames of invulnerability
+            
+            // Push player up slightly
+            player.velocityY = -10;
+        }
+
+        // Update the lives UI
+        function updateLivesUI() {
+            const hearts = '❤️'.repeat(gameState.lives);
+            uiLives.querySelector('span').textContent = hearts;
+            
+            // Update heart button state
+            updateHeartButton();
+        }
+
+        // Update the max lives UI
+        function updateMaxLivesUI() {
+            uiMaxLives.querySelector('span').textContent = `Max Lives: ${gameState.maxLives}`;
+        }
+
+        // Update the coins UI
+        function updateCoinsUI() {
+            uiCoins.querySelector('span').textContent = `$ ${gameState.totalCoins}`;
+        }
+
+        // Update the protectors UI
+        function updateProtectorUI() {
+            uiProtectors.querySelector('span').textContent = `🛡️ ${gameState.ownedProtectors}`;
+        }
+
+        // Update the medicine UI
+        function updateMedicineUI() {
+            uiMedicine.querySelector('span').textContent = `💊 ${gameState.ownedMedicine}`;
+        }
+
+        // Update total coins display
+        function updateTotalCoinsDisplay() {
+            totalCoinsDisplay.textContent = gameState.totalCoins;
+        }
+
+        // Handle level completion
+        function levelComplete() {
+            gameState.gameRunning = false;
+            
+            // Stop timer
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+            }
+            
+            // Play level complete sound
+            playSound(levelCompleteSound);
+            
+            // Stop background music
+            bgm.pause();
+            
+            // Add to completed levels
+            gameState.completedLevels.add(gameState.currentLevel);
+            
+            // Set win message
+            winMessage.textContent = "You collected the key!";
+            
+            // Show the win screen with appropriate buttons
+            if (gameState.currentLevel < settings.totalLevels) {
+                nextLevelBtn.style.display = 'inline-block';
+            } else {
+                nextLevelBtn.style.display = 'none';
+            }
+            
+            // Hide controls
+            touchControls.style.display = 'none';
+            
+            // Hide game buttons
+            document.querySelector('.game-buttons').style.display = 'none';
+            
+            winScreen.style.display = 'flex';
+        }
+
+        // Handle game over
+        function gameOver() {
+            gameState.gameRunning = false;
+            
+            // Reset medicine effect if active
+            gameState.medicineActive = false;
+            player.sizeMultiplier = 1;
+            
+            // Stop timer
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+            }
+            
+            // Play game over sound
+            playSound(gameOverSound);
+            
+            // Stop background music
+            bgm.pause();
+            
+            if (gameState.gameInterval) {
+                clearInterval(gameState.gameInterval);
+                gameState.gameInterval = null;
+            }
+            
+            if (gameState.animationFrame) {
+                cancelAnimationFrame(gameState.animationFrame);
+                gameState.animationFrame = null;
+            }
+            
+            // Set default message
+            gameOverMessage.textContent = "You ran out of lives!";
+            
+            // Hide controls
+            touchControls.style.display = 'none';
+            
+            // Hide game buttons
+            document.querySelector('.game-buttons').style.display = 'none';
+            
+            gameOverScreen.style.display = 'flex';
+        }
+
+        // Handle winning the game (final level)
+        function gameWon() {
+            gameState.gameRunning = false;
+            
+            // Stop timer
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+            }
+            
+            // Add 50 bonus points for the big coin
+            gameState.totalCoins += 50;
+            updateTotalCoinsDisplay();
+            
+            // Play victory sound
+            playSound(victorySound);
+            
+            // Stop background music
+            bgm.pause();
+            
+            if (gameState.gameInterval) {
+                clearInterval(gameState.gameInterval);
+                gameState.gameInterval = null;
+            }
+            
+            if (gameState.animationFrame) {
+                cancelAnimationFrame(gameState.animationFrame);
+                gameState.animationFrame = null;
+            }
+            
+            // Add to completed levels
+            gameState.completedLevels.add(gameState.currentLevel);
+            
+            // Set win message for final level
+            winMessage.textContent = "Congratulations! You've collected the golden coin!";
+            
+            // Hide next level button
+            nextLevelBtn.style.display = 'none';
+            
+            // Hide controls
+            touchControls.style.display = 'none';
+            
+            // Hide game buttons
+            document.querySelector('.game-buttons').style.display = 'none';
+            
+            winScreen.style.display = 'flex';
+        }
+
+        // Return to level selection screen
+        function returnToLevelSelection() {
+            gameState.gameRunning = false;
+            
+            // Reset medicine effect if active
+            gameState.medicineActive = false;
+            player.sizeMultiplier = 1;
+            
+            // Stop timer
+            if (gameState.timerInterval) {
+                clearInterval(gameState.timerInterval);
+            }
+            
+            // Stop background music
+            bgm.pause();
+            
+            if (gameState.gameInterval) {
+                clearInterval(gameState.gameInterval);
+                gameState.gameInterval = null;
+            }
+            
+            if (gameState.animationFrame) {
+                cancelAnimationFrame(gameState.animationFrame);
+                gameState.animationFrame = null;
+            }
+            
+            // Generate level buttons with updated status
+            generateLevelButtons();
+            
+            // Hide controls
+            touchControls.style.display = 'none';
+            
+            // Show level screen, hide other screens
+            levelScreen.style.display = 'flex';
+            canvas.style.display = 'none';
+            gameUI.style.display = 'none';
+            gameOverScreen.style.display = 'none';
+            winScreen.style.display = 'none';
+            document.querySelector('.game-buttons').style.display = 'none';
+            
+            // Reset timer display
+            uiTimer.classList.remove('warning');
+        }
+
+        // Helper function to check if dark mode is active
+        function isDarkMode() {
+            return document.documentElement.classList.contains('dark');
+        }
+
+        // Initialize everything when the page loads
+        window.addEventListener('load', function() {
+            // Create sound effects
+            createSoundEffects();
+            
+            // Set up touch controls
+            setupTouchControls();
+            
+            // Initialize shop
+            initShop();
+            
+            // Resize canvas initially
+            resizeCanvas();
+            
+            // Handle window resize
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Handle first user interaction to enable audio (browser policy)
+            document.addEventListener('click', function initAudio() {
+                // Try to play a silent sound to enable audio context
+                const silentSound = new Audio("data:audio/wav;base64,UklGRigAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQQAAAAAAA==");
+                silentSound.play().catch(e => console.log("Enabling audio failed:", e));
+                document.removeEventListener('click', initAudio);
+            }, {once: true});
+        });
+    </script>
+</body>
+</html>

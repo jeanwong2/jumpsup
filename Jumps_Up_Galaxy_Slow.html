@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Jumps Up</title>
     <style>
         :root {
@@ -28,8 +28,14 @@
             align-items: center;
             background-color: var(--bg-light);
             color: var(--text-light);
-            padding: 15px;
+            padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
             box-sizing: border-box;
+        }
+
+        @media (min-width: 480px) {
+            body {
+                padding: 15px;
+            }
         }
 
         .dark body {
@@ -50,6 +56,15 @@
             box-sizing: border-box;
         }
 
+        @media (max-width: 479px) {
+            #game-container {
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
+                max-height: 100vh;
+            }
+        }
+
         /* Welcome Screen / Name Input */
         #welcome-screen {
             position: absolute;
@@ -63,6 +78,8 @@
             justify-content: center;
             align-items: center;
             z-index: 30;
+            padding: 20px;
+            box-sizing: border-box;
         }
 
         .dark #welcome-screen {
@@ -73,10 +90,12 @@
             font-size: 18px;
             padding: 10px 15px;
             width: 250px;
+            max-width: 100%;
             margin: 20px 0;
             border: 2px solid var(--primary);
             border-radius: 5px;
             text-align: center;
+            box-sizing: border-box;
         }
 
         /* Level Selection Screen */
@@ -90,6 +109,7 @@
             display: none;
             flex-direction: column;
             z-index: 10;
+            overflow-y: auto;
         }
 
         .dark #level-screen {
@@ -102,9 +122,17 @@
             margin: 20px 0;
         }
 
+        @media (max-width: 479px) {
+            h1 {
+                font-size: 20px;
+                margin: 10px 0 6px;
+            }
+        }
+
         .level-selection-container {
             display: flex;
             height: calc(100% - 80px);
+            flex-direction: row;
         }
 
         .level-grid-container {
@@ -125,6 +153,40 @@
             max-height: 100%;
         }
 
+        /* Mobile: stack shop above level grid */
+        @media (max-width: 479px) {
+            .level-selection-container {
+                flex-direction: column;
+                height: auto;
+                overflow-y: visible;
+            }
+
+            .level-grid-container {
+                padding: 0 10px 10px 10px;
+                flex: none;
+                overflow-y: visible;
+            }
+
+            .shop-container {
+                flex: none;
+                border-left: none;
+                border-top: 1px solid #ccc;
+                border-bottom: 1px solid #ccc;
+                flex-direction: row;
+                flex-wrap: wrap;
+                justify-content: center;
+                padding: 10px;
+                max-height: none;
+                gap: 8px;
+                order: -1; /* shop first on mobile */
+            }
+
+            .dark .shop-container {
+                border-top: 1px solid #444;
+                border-bottom: 1px solid #444;
+            }
+        }
+
         .dark .shop-container {
             background-color: rgba(255, 255, 255, 0.05);
             border-left: 1px solid #444;
@@ -140,6 +202,15 @@
             background-color: inherit;
             padding: 5px 0;
             z-index: 2;
+            width: 100%;
+        }
+
+        @media (max-width: 479px) {
+            .shop-title {
+                font-size: 16px;
+                margin-bottom: 6px;
+                position: static;
+            }
         }
 
         .shop-item {
@@ -151,6 +222,16 @@
             max-width: 250px;
             text-align: center;
             transition: transform 0.2s;
+        }
+
+        @media (max-width: 479px) {
+            .shop-item {
+                padding: 8px;
+                margin-bottom: 0;
+                max-width: 140px;
+                min-width: 120px;
+                flex: 1;
+            }
         }
 
         .dark .shop-item {
@@ -191,6 +272,13 @@
             margin-bottom: 15px;
         }
 
+        @media (max-width: 479px) {
+            .shop-item-title { font-size: 13px; margin-bottom: 4px; }
+            .shop-item-description { font-size: 11px; margin-bottom: 4px; line-height: 1.3; }
+            .shop-item-price { font-size: 13px; margin-bottom: 4px; }
+            .shop-item-stock { font-size: 11px; margin-bottom: 6px; }
+        }
+
         .buy-btn {
             background-color: var(--primary);
             color: white;
@@ -217,6 +305,14 @@
             padding-bottom: 20px;
         }
 
+        @media (max-width: 479px) {
+            .level-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+                padding-bottom: 10px;
+            }
+        }
+
         .level-btn {
             width: 100%;
             aspect-ratio: 1/1;
@@ -231,6 +327,8 @@
             justify-content: center;
             align-items: center;
             transition: transform 0.2s;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
 
         .level-btn:hover:not(.locked) {
@@ -259,6 +357,11 @@
             margin-top: 5px;
         }
 
+        @media (max-width: 479px) {
+            .level-btn .level-number { font-size: 16px; }
+            .level-btn .level-status { font-size: 9px; margin-top: 2px; }
+        }
+
         .total-coins {
             background-color: rgba(0, 0, 0, 0.5);
             color: white;
@@ -271,6 +374,15 @@
             top: 20px;
             right: 20px;
             font-size: 16px;
+        }
+
+        @media (max-width: 479px) {
+            .total-coins {
+                font-size: 13px;
+                padding: 3px 10px;
+                top: 10px;
+                right: 10px;
+            }
         }
 
         .coin-icon {
@@ -501,25 +613,30 @@
         #touch-controls {
             position: absolute;
             bottom: 20px;
+            bottom: max(20px, env(safe-area-inset-bottom, 20px));
             left: 0;
             right: 0;
             display: none;
             justify-content: space-between;
+            align-items: flex-end;
             z-index: 10;
             pointer-events: all;
+            padding: 0 4px;
         }
 
         #direction-controls {
             display: flex;
             margin-left: 20px;
             pointer-events: auto;
+            gap: 6px;
         }
 
         #action-controls {
             display: flex;
             margin-right: 20px;
             pointer-events: auto;
-            gap: 10px;
+            gap: 8px;
+            align-items: flex-end;
         }
 
         .touch-btn {
@@ -536,7 +653,16 @@
             cursor: pointer;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
-            margin: 0 5px;
+            touch-action: manipulation;
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            font-style: normal;
+            font-weight: bold;
+            line-height: 1;
+            letter-spacing: 0;
+            text-align: center;
+            /* Prevent iOS from rendering Z as emoji */
+            font-variant: normal;
         }
 
         .touch-btn:active {
@@ -546,7 +672,9 @@
         .touch-btn#jump-btn {
             width: 80px;
             height: 80px;
-            font-size: 28px;
+            font-size: 32px;
+            background-color: rgba(255, 200, 0, 0.4);
+            border-color: rgba(255, 200, 0, 0.8);
         }
 
         .touch-btn#shield-btn {
@@ -565,7 +693,7 @@
         }
 
         .touch-btn.disabled {
-            opacity: 0.5;
+            opacity: 0.4;
             cursor: not-allowed;
         }
 
@@ -595,15 +723,17 @@
             .touch-btn {
                 width: 50px;
                 height: 50px;
+                font-size: 20px;
             }
             
             .touch-btn#jump-btn {
-                width: 70px;
-                height: 70px;
+                width: 65px;
+                height: 65px;
+                font-size: 26px;
             }
             
             #touch-controls {
-                bottom: 10px;
+                bottom: 8px;
             }
         }
 
@@ -637,7 +767,30 @@
                 height: 28px;
             }
             #ui-max-lives {
-                display: none; /* Hide max lives on mobile to save space, redundant anyway */
+                display: none;
+            }
+        }
+
+        @media (max-width: 479px) {
+            #touch-controls {
+                bottom: max(12px, env(safe-area-inset-bottom, 12px));
+            }
+            #direction-controls {
+                margin-left: 10px;
+            }
+            #action-controls {
+                margin-right: 10px;
+                gap: 6px;
+            }
+            .touch-btn {
+                width: 52px;
+                height: 52px;
+                font-size: 20px;
+            }
+            .touch-btn#jump-btn {
+                width: 68px;
+                height: 68px;
+                font-size: 26px;
             }
         }
 </style>
@@ -737,7 +890,7 @@
                 <button class="touch-btn" id="heart-btn">❤️</button>
                 <button class="touch-btn" id="medicine-btn">💊</button>
                 <button class="touch-btn" id="shield-btn">🛡️</button>
-                <button class="touch-btn" id="jump-btn">Z</button>
+                <button class="touch-btn" id="jump-btn"><span style="font-family:Arial,Helvetica,sans-serif;font-style:normal;font-weight:bold;font-variant:normal;">Z</span></button>
             </div>
         </div>
 

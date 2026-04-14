@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jumps Up</title>
     <style>
         :root {
@@ -28,14 +28,8 @@
             align-items: center;
             background-color: var(--bg-light);
             color: var(--text-light);
-            padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px);
+            padding: 15px;
             box-sizing: border-box;
-        }
-
-        @media (min-width: 480px) {
-            body {
-                padding: 15px;
-            }
         }
 
         .dark body {
@@ -56,15 +50,6 @@
             box-sizing: border-box;
         }
 
-        @media (max-width: 479px) {
-            #game-container {
-                border-radius: 0;
-                border-left: none;
-                border-right: none;
-                max-height: 100vh;
-            }
-        }
-
         /* Welcome Screen / Name Input */
         #welcome-screen {
             position: absolute;
@@ -78,8 +63,6 @@
             justify-content: center;
             align-items: center;
             z-index: 30;
-            padding: 20px;
-            box-sizing: border-box;
         }
 
         .dark #welcome-screen {
@@ -90,12 +73,10 @@
             font-size: 18px;
             padding: 10px 15px;
             width: 250px;
-            max-width: 100%;
             margin: 20px 0;
             border: 2px solid var(--primary);
             border-radius: 5px;
             text-align: center;
-            box-sizing: border-box;
         }
 
         /* Level Selection Screen */
@@ -109,7 +90,6 @@
             display: none;
             flex-direction: column;
             z-index: 10;
-            overflow-y: auto;
         }
 
         .dark #level-screen {
@@ -122,17 +102,9 @@
             margin: 20px 0;
         }
 
-        @media (max-width: 479px) {
-            h1 {
-                font-size: 20px;
-                margin: 10px 0 6px;
-            }
-        }
-
         .level-selection-container {
             display: flex;
             height: calc(100% - 80px);
-            flex-direction: row;
         }
 
         .level-grid-container {
@@ -153,40 +125,6 @@
             max-height: 100%;
         }
 
-        /* Mobile: stack shop above level grid */
-        @media (max-width: 479px) {
-            .level-selection-container {
-                flex-direction: column;
-                height: auto;
-                overflow-y: visible;
-            }
-
-            .level-grid-container {
-                padding: 0 10px 10px 10px;
-                flex: none;
-                overflow-y: visible;
-            }
-
-            .shop-container {
-                flex: none;
-                border-left: none;
-                border-top: 1px solid #ccc;
-                border-bottom: 1px solid #ccc;
-                flex-direction: row;
-                flex-wrap: wrap;
-                justify-content: center;
-                padding: 10px;
-                max-height: none;
-                gap: 8px;
-                order: -1; /* shop first on mobile */
-            }
-
-            .dark .shop-container {
-                border-top: 1px solid #444;
-                border-bottom: 1px solid #444;
-            }
-        }
-
         .dark .shop-container {
             background-color: rgba(255, 255, 255, 0.05);
             border-left: 1px solid #444;
@@ -202,15 +140,6 @@
             background-color: inherit;
             padding: 5px 0;
             z-index: 2;
-            width: 100%;
-        }
-
-        @media (max-width: 479px) {
-            .shop-title {
-                font-size: 16px;
-                margin-bottom: 6px;
-                position: static;
-            }
         }
 
         .shop-item {
@@ -222,16 +151,6 @@
             max-width: 250px;
             text-align: center;
             transition: transform 0.2s;
-        }
-
-        @media (max-width: 479px) {
-            .shop-item {
-                padding: 8px;
-                margin-bottom: 0;
-                max-width: 140px;
-                min-width: 120px;
-                flex: 1;
-            }
         }
 
         .dark .shop-item {
@@ -272,13 +191,6 @@
             margin-bottom: 15px;
         }
 
-        @media (max-width: 479px) {
-            .shop-item-title { font-size: 13px; margin-bottom: 4px; }
-            .shop-item-description { font-size: 11px; margin-bottom: 4px; line-height: 1.3; }
-            .shop-item-price { font-size: 13px; margin-bottom: 4px; }
-            .shop-item-stock { font-size: 11px; margin-bottom: 6px; }
-        }
-
         .buy-btn {
             background-color: var(--primary);
             color: white;
@@ -305,14 +217,6 @@
             padding-bottom: 20px;
         }
 
-        @media (max-width: 479px) {
-            .level-grid {
-                grid-template-columns: repeat(4, 1fr);
-                gap: 8px;
-                padding-bottom: 10px;
-            }
-        }
-
         .level-btn {
             width: 100%;
             aspect-ratio: 1/1;
@@ -327,8 +231,6 @@
             justify-content: center;
             align-items: center;
             transition: transform 0.2s;
-            -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
         }
 
         .level-btn:hover:not(.locked) {
@@ -357,11 +259,6 @@
             margin-top: 5px;
         }
 
-        @media (max-width: 479px) {
-            .level-btn .level-number { font-size: 16px; }
-            .level-btn .level-status { font-size: 9px; margin-top: 2px; }
-        }
-
         .total-coins {
             background-color: rgba(0, 0, 0, 0.5);
             color: white;
@@ -374,15 +271,6 @@
             top: 20px;
             right: 20px;
             font-size: 16px;
-        }
-
-        @media (max-width: 479px) {
-            .total-coins {
-                font-size: 13px;
-                padding: 3px 10px;
-                top: 10px;
-                right: 10px;
-            }
         }
 
         .coin-icon {
@@ -613,30 +501,25 @@
         #touch-controls {
             position: absolute;
             bottom: 20px;
-            bottom: max(20px, env(safe-area-inset-bottom, 20px));
             left: 0;
             right: 0;
             display: none;
             justify-content: space-between;
-            align-items: flex-end;
             z-index: 10;
             pointer-events: all;
-            padding: 0 4px;
         }
 
         #direction-controls {
             display: flex;
             margin-left: 20px;
             pointer-events: auto;
-            gap: 6px;
         }
 
         #action-controls {
             display: flex;
             margin-right: 20px;
             pointer-events: auto;
-            gap: 8px;
-            align-items: flex-end;
+            gap: 10px;
         }
 
         .touch-btn {
@@ -653,16 +536,7 @@
             cursor: pointer;
             user-select: none;
             -webkit-tap-highlight-color: transparent;
-            touch-action: manipulation;
-            margin: 0;
-            font-family: Arial, Helvetica, sans-serif;
-            font-style: normal;
-            font-weight: bold;
-            line-height: 1;
-            letter-spacing: 0;
-            text-align: center;
-            /* Prevent iOS from rendering Z as emoji */
-            font-variant: normal;
+            margin: 0 5px;
         }
 
         .touch-btn:active {
@@ -672,9 +546,7 @@
         .touch-btn#jump-btn {
             width: 80px;
             height: 80px;
-            font-size: 32px;
-            background-color: rgba(255, 200, 0, 0.4);
-            border-color: rgba(255, 200, 0, 0.8);
+            font-size: 28px;
         }
 
         .touch-btn#shield-btn {
@@ -693,7 +565,7 @@
         }
 
         .touch-btn.disabled {
-            opacity: 0.4;
+            opacity: 0.5;
             cursor: not-allowed;
         }
 
@@ -723,17 +595,15 @@
             .touch-btn {
                 width: 50px;
                 height: 50px;
-                font-size: 20px;
             }
             
             .touch-btn#jump-btn {
-                width: 65px;
-                height: 65px;
-                font-size: 26px;
+                width: 70px;
+                height: 70px;
             }
             
             #touch-controls {
-                bottom: 8px;
+                bottom: 10px;
             }
         }
 
@@ -767,30 +637,7 @@
                 height: 28px;
             }
             #ui-max-lives {
-                display: none;
-            }
-        }
-
-        @media (max-width: 479px) {
-            #touch-controls {
-                bottom: max(12px, env(safe-area-inset-bottom, 12px));
-            }
-            #direction-controls {
-                margin-left: 10px;
-            }
-            #action-controls {
-                margin-right: 10px;
-                gap: 6px;
-            }
-            .touch-btn {
-                width: 52px;
-                height: 52px;
-                font-size: 20px;
-            }
-            .touch-btn#jump-btn {
-                width: 68px;
-                height: 68px;
-                font-size: 26px;
+                display: none; /* Hide max lives on mobile to save space, redundant anyway */
             }
         }
 </style>
@@ -890,7 +737,7 @@
                 <button class="touch-btn" id="heart-btn">❤️</button>
                 <button class="touch-btn" id="medicine-btn">💊</button>
                 <button class="touch-btn" id="shield-btn">🛡️</button>
-                <button class="touch-btn" id="jump-btn"><span style="font-family:Arial,Helvetica,sans-serif;font-style:normal;font-weight:bold;font-variant:normal;">Z</span></button>
+                <button class="touch-btn" id="jump-btn">Z</button>
             </div>
         </div>
 
@@ -1414,7 +1261,8 @@
             facingRight: true,
             invulnerable: false,
             invulnerabilityTimer: 0,
-            sizeMultiplier: 1 // Default size
+            sizeMultiplier: 1, // Default size
+            jumpTimer: 0
         };
 
         // Level elements
@@ -1488,7 +1336,7 @@
             if (e.key === ' ' || e.code === 'Space' || e.key.startsWith('Arrow')) e.preventDefault();
             if (e.key === 'ArrowLeft') keys.left = true;
             if (e.key === 'ArrowRight') keys.right = true;
-            if (e.key === 'z' || e.key === 'Z' || e.key === ' ' || e.code === 'Space') {
+            if (e.key === 'z' || e.key === 'Z' || e.key === ' ' || e.code === 'Space' || e.key === 'b' || e.key === 'B') {
                 if (!keys.jump && !keys.jumpPressed) {
                     keys.jumpPressed = true; // Mark as just pressed
                 }
@@ -1517,7 +1365,7 @@
         document.addEventListener('keyup', (e) => {
             if (e.key === 'ArrowLeft') keys.left = false;
             if (e.key === 'ArrowRight') keys.right = false;
-            if (e.key === 'z' || e.key === 'Z' || e.key === ' ' || e.code === 'Space') {
+            if (e.key === 'z' || e.key === 'Z' || e.key === ' ' || e.code === 'Space' || e.key === 'b' || e.key === 'B') {
                 keys.jump = false;
                 keys.jumpPressed = false;
             }
@@ -1840,24 +1688,82 @@
 
         // Setup Crazy Mode (secret dogman mode)
         function setupCrazyMode() {
-            // Check if player name is the secret code
-            if (gameState.playerName.toLowerCase() === "dogman") {
+            const name = gameState.playerName.toLowerCase();
+
+            // Check for Premium (Dogman)
+            if (name === "dogman") {
                 gameState.crazyMode = true;
-                
+
                 // Create and add crazy mode indicator
                 const crazyIndicator = document.createElement('div');
                 crazyIndicator.className = 'crazy-mode-indicator';
-                crazyIndicator.textContent = '🐶 CRAZY MODE 🐶';
+                crazyIndicator.textContent = '🐶 PREMIUM MODE 🐶';
                 gameContainer.appendChild(crazyIndicator);
-                
+
                 // Infinite stock for all items
                 updateStockForCrazyMode();
-                
+
                 // Hide timer since it doesn't apply in crazy mode
                 uiTimer.style.display = 'none';
             }
-        }
 
+            // VIP and VVIP UI
+            if (name === "lg" || name === "be") {
+                const isVVIP = (name === "be");
+
+                const customizeContainer = document.createElement('div');
+                customizeContainer.className = 'shop-container';
+                customizeContainer.style.marginBottom = '20px';
+
+                let uiHtml = `<div class="shop-title">${isVVIP ? 'VVIP' : 'VIP'} Customise</div>
+                <div style="padding: 10px; color: white;">
+                    <div style="margin-bottom: 10px;">
+                        <p style="margin-bottom: 5px;">Pick a Colour:</p>
+                        <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                            ${['#f44336','#ff9800','#ffeb3b','#4caf50','#2196f3','#9c27b0','#795548','#ffffff', '#000000'].map(c => 
+                                `<button class="game-btn color-btn" style="min-width: 35px; height: 35px; padding: 0; background: ${c}; border: 2px solid white; border-radius: 5px;" data-color="${c}"></button>`
+                            ).join('')}
+                        </div>
+                    </div>`;
+
+                if (isVVIP) {
+                    uiHtml += `<div>
+                        <p style="margin-bottom: 5px;">Pick a Character:</p>
+                        <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                            ${['👧🏼','👦🏼','👩🏻','🧑🏽','👮🏻‍♀️','💂🏼‍♂️','👩🏻‍🌾','🐶','🐱','🐷','🐮','🐴', 'NONE'].map(e => 
+                                `<button class="game-btn emoji-btn" style="min-width: 40px; height: 40px; padding: 0; font-size: 20px;" data-emoji="${e === 'NONE' ? '' : e}">${e === 'NONE' ? '❌' : e}</button>`
+                            ).join('')}
+                        </div>
+                    </div>`;
+                }
+
+                uiHtml += `</div>`;
+                customizeContainer.innerHTML = uiHtml;
+
+                // Add listeners
+                const levelScreen = document.getElementById('level-screen');
+                const selContainer = levelScreen.querySelector('.level-selection-container');
+                selContainer.insertBefore(customizeContainer, selContainer.firstChild);
+
+                customizeContainer.querySelectorAll('.color-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        playerCustomColor = e.target.getAttribute('data-color');
+                        playerCustomEmoji = null; // Clear emoji if color selected
+                        if (typeof coinSound !== 'undefined' && coinSound.play) coinSound.play().catch(()=>{});
+                    });
+                });
+
+                if (isVVIP) {
+                    customizeContainer.querySelectorAll('.emoji-btn').forEach(btn => {
+                        btn.addEventListener('click', (e) => {
+                            const em = e.target.getAttribute('data-emoji');
+                            playerCustomEmoji = em ? em : null;
+                            if (typeof coinSound !== 'undefined' && coinSound.play) coinSound.play().catch(()=>{});
+                        });
+                    });
+                }
+            }
+        }
         // Update shop stock for crazy mode
         function updateStockForCrazyMode() {
             if (gameState.crazyMode) {
@@ -2057,9 +1963,9 @@
                 levelBtn.className = 'level-btn';
                 
                 // Only first 3 levels are initially unlocked (or all in crazy mode)
-                if (!gameState.crazyMode && i > 3 && !gameState.completedLevels.has(i - 1)) {
-                    levelBtn.classList.add('locked');
-                }
+                // Levels fully unlocked
+                //     levelBtn.classList.add('locked');
+                // }
                 
                 levelBtn.setAttribute('data-level', i);
                 levelBtn.innerHTML = `
@@ -2071,9 +1977,9 @@
                     const levelNum = parseInt(levelBtn.getAttribute('data-level'));
                     
                     // Can't play locked levels (unless in crazy mode)
-                    if (!gameState.crazyMode && levelBtn.classList.contains('locked')) {
-                        return;
-                    }
+                    // Levels fully unlocked
+                    //     return;
+                    // }
                     
                     startLevel(levelNum);
                 });
@@ -2366,7 +2272,12 @@
             
             // Handle jumping
             if (keys.jump && player.onGround) {
-                player.velocityY = (gameState.currentLevel >= 51 && gameState.currentLevel <= 62) ? settings.jumpForce * 0.75 : settings.jumpForce;
+                if (gameState.currentLevel >= 51 && gameState.currentLevel <= 62) {
+                player.velocityY = settings.jumpForce * 0.75;
+                player.jumpTimer = 0;
+            } else {
+                player.velocityY = settings.jumpForce;
+            }
                 player.jumping = true;
                 player.onGround = false;
 
@@ -2396,7 +2307,26 @@
             }
             
             // Apply gravity
-            player.velocityY += (gameState.currentLevel >= 51 && gameState.currentLevel <= 62) ? settings.gravity * 0.6 : settings.gravity;
+            if (gameState.currentLevel >= 51 && gameState.currentLevel <= 62) {
+                if (player.onGround) {
+                    player.jumpTimer = 0;
+                } else {
+                    player.jumpTimer += 1/60;
+                    // First go up normally (jump force carries us up) until we start falling
+                    // We only apply the 'float' when we reach the peak of the jump (velocityY >= 0)
+                    if (player.velocityY < 0 && player.jumpTimer < 0.5) {
+                        player.velocityY += settings.gravity * 0.6; // normal slow upward gravity
+                    } else if (player.jumpTimer <= 1.5) { // 1 second float at the peak
+                        player.velocityY = 0;
+                    } else if (player.jumpTimer <= 3.75) { // 2.25s slow fall
+                        player.velocityY += settings.gravity * 0.35;
+                    } else {
+                        player.velocityY += settings.gravity * 0.6;
+                    }
+                }
+            } else {
+                player.velocityY += settings.gravity;
+            }
             
             // Update position
             player.x += player.velocityX;
@@ -3040,8 +2970,17 @@ function drawGame() {
                 ctx.save();
                 ctx.translate(centerX, centerY);
                 ctx.rotate(bodyTilt);
-                ctx.strokeStyle = '#000';
-                ctx.fillStyle = '#000';
+
+                if (playerCustomEmoji) {
+                    ctx.font = `${40 * player.sizeMultiplier}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(playerCustomEmoji, 0, -scaledHeight * 0.1);
+                    ctx.restore();
+                } else {
+
+                ctx.strokeStyle = playerCustomColor;
+                ctx.fillStyle = playerCustomColor;
                 ctx.lineWidth = 2 * player.sizeMultiplier;
 
                 ctx.beginPath();
@@ -3080,11 +3019,12 @@ function drawGame() {
                 ctx.stroke();
 
                 const eyeOffsetX = player.facingRight ? 3 * player.sizeMultiplier : -3 * player.sizeMultiplier;
-                ctx.fillStyle = '#FFF';
+                ctx.fillStyle = playerCustomColor === '#ffffff' ? '#000' : '#FFF';
                 ctx.beginPath();
                 ctx.arc(eyeOffsetX, -scaledHeight * 0.36, 2 * player.sizeMultiplier, 0, Math.PI * 2);
                 ctx.fill();
                 ctx.restore();
+                }
             }
 
         }

@@ -39,15 +39,19 @@
 
         #game-container {
             position: relative;
-            width: 100%;
+            width: 100vw;
             max-width: 650px;
-            height: 100%;
+            height: 100vh;
             max-height: 700px;
-            border: 2px solid var(--primary);
+            border: none; /* Removed border for seamless mobile feel */
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
             overflow: hidden;
-            border-radius: 8px;
+            border-radius: 0; /* Remove radius for edge-to-edge on mobile */
             box-sizing: border-box;
+            margin: 0 auto;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            user-select: none;
         }
 
         /* Welcome Screen / Name Input */
@@ -79,216 +83,54 @@
             text-align: center;
         }
 
-        /* Level Selection Screen (Modern Design) */
+        /* Level Selection Screen (Clean & Responsive) */
         #level-screen {
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            inset: 0;
+            background-color: var(--bg-light);
             display: none;
             flex-direction: column;
             z-index: 10;
+            overflow: hidden;
         }
-
         .dark #level-screen {
-            background: linear-gradient(135deg, #1f1c2c 0%, #0d0c15 100%);
+            background-color: var(--bg-dark);
         }
 
-        h1 {
+        #level-screen h1 {
             color: var(--primary);
             text-align: center;
-            margin: 25px 0 15px;
-            font-size: 32px;
-            font-weight: 800;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            text-shadow: 0 2px 10px rgba(93, 92, 222, 0.3);
-        }
-
-        .dark h1 {
-            color: #8b7cff;
-            text-shadow: 0 2px 15px rgba(139, 124, 255, 0.5);
+            margin: 14px 70px 8px 14px;
+            font-size: 24px;
+            font-weight: bold;
+            flex: 0 0 auto;
         }
 
         .level-selection-container {
-            display: flex;
-            height: calc(100% - 90px);
-            padding: 0 20px 20px;
-            gap: 20px;
+            display: grid;
+            grid-template-columns: 170px minmax(0, 1fr) 170px;
+            gap: 14px;
+            flex: 1;
+            min-height: 0;
+            padding: 10px 14px 14px;
+            box-sizing: border-box;
+            overflow: hidden;
+            align-items: stretch;
         }
 
         .level-grid-container {
-            flex: 7;
+            min-width: 0;
+            min-height: 0;
             overflow-y: auto;
-            padding-right: 10px;
-        }
-
-        /* Modern Scrollbar */
-        .level-grid-container::-webkit-scrollbar, .shop-container::-webkit-scrollbar {
-            width: 8px;
-        }
-        .level-grid-container::-webkit-scrollbar-track, .shop-container::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.05);
-            border-radius: 10px;
-        }
-        .dark .level-grid-container::-webkit-scrollbar-track, .dark .shop-container::-webkit-scrollbar-track {
-            background: rgba(255,255,255,0.05);
-        }
-        .level-grid-container::-webkit-scrollbar-thumb, .shop-container::-webkit-scrollbar-thumb {
-            background: var(--primary);
-            border-radius: 10px;
-        }
-
-        .shop-container {
-            flex: 4;
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            border: 1px solid rgba(255,255,255,0.5);
-            overflow-y: auto;
-            max-height: 100%;
-        }
-
-        .dark .shop-container {
-            background: rgba(30, 30, 40, 0.7);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .shop-title {
-            color: var(--primary);
-            text-align: center;
-            margin-bottom: 20px;
-            font-size: 26px;
-            font-weight: 800;
-            position: sticky;
-            top: 0;
-            background: inherit;
-            padding: 5px 0;
-            z-index: 2;
-            width: 100%;
-        }
-
-        .dark .shop-title {
-            color: #8b7cff;
-        }
-
-        .shop-item {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 15px;
-            width: 100%;
-            max-width: 280px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-            border: 1px solid rgba(0,0,0,0.05);
-            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-        }
-
-        .dark .shop-item {
-            background: rgba(40, 40, 55, 0.9);
-            border: 1px solid rgba(255,255,255,0.05);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .shop-item:hover:not(.sold-out) {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(93, 92, 222, 0.2);
-            border-color: var(--primary);
-        }
-
-        .shop-item.sold-out {
-            opacity: 0.6;
-            pointer-events: none;
-            filter: grayscale(1);
-        }
-
-        .shop-item-title {
-            font-weight: 800;
-            margin-bottom: 10px;
-            font-size: 18px;
-            color: #333;
-        }
-
-        .dark .shop-item-title {
-            color: #fff;
-        }
-
-        .shop-item-description {
-            margin-bottom: 15px;
-            font-size: 13px;
-            line-height: 1.5;
-            color: #666;
-        }
-
-        .dark .shop-item-description {
-            color: #aaa;
-        }
-
-        .shop-item-price {
-            font-weight: 800;
-            color: #FFA000;
-            margin-bottom: 10px;
-            font-size: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 5px;
-        }
-
-        .shop-item-stock {
-            font-size: 13px;
-            color: #888;
-            margin-bottom: 15px;
-            font-weight: 600;
-        }
-
-        .buy-btn {
-            background: linear-gradient(135deg, var(--primary) 0%, #8b7cff 100%);
-            color: white;
-            border: none;
-            padding: 10px 25px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 16px;
-            transition: all 0.2s;
-            box-shadow: 0 4px 10px rgba(93, 92, 222, 0.3);
-            width: 100%;
-        }
-
-        .buy-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 6px 15px rgba(93, 92, 222, 0.5);
-        }
-
-        .buy-btn:disabled {
-            background: #ccc;
-            box-shadow: none;
-            cursor: not-allowed;
-            color: #666;
-            transform: none;
-        }
-
-        .dark .buy-btn:disabled {
-            background: #444;
-            color: #888;
+            -webkit-overflow-scrolling: touch;
+            padding-right: 6px;
         }
 
         .level-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(70px, 1fr));
-            gap: 15px;
-            padding-bottom: 20px;
-            width: 100%;
+            grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+            gap: 12px;
+            padding-bottom: 16px;
         }
 
         .level-btn {
@@ -297,29 +139,33 @@
             background-color: var(--primary);
             color: white;
             border: none;
-            border-radius: 10px;
+            border-radius: 12px;
             font-size: 18px;
             cursor: pointer;
             display: flex;
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            transition: transform 0.2s;
+            transition: transform 0.15s, box-shadow 0.15s;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
 
         .level-btn:hover:not(.locked) {
-            transform: scale(1.05);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(93, 92, 222, 0.25);
         }
 
         .level-btn.locked {
-            background-color: #555555;
+            background-color: #777;
+            color: #ccc;
             cursor: not-allowed;
             position: relative;
+            box-shadow: none;
         }
 
         .level-btn.locked::after {
             content: "🔒";
-            font-size: 20px;
+            font-size: 22px;
             position: absolute;
         }
 
@@ -329,66 +175,177 @@
         }
 
         .level-btn .level-status {
-            font-size: 12px;
-            margin-top: 5px;
+            font-size: 10px;
+            margin-top: 4px;
+            opacity: 0.9;
+        }
+
+        .shop-container, .vip-customize-pane {
+            min-width: 0;
+            min-height: 0;
+            background-color: rgba(0, 0, 0, 0.05);
+            padding: 8px;
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            border: 1px solid rgba(0,0,0,0.1);
+            box-sizing: border-box;
+        }
+
+        .dark .shop-container, .dark .vip-customize-pane {
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .shop-title {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 8px;
+            font-size: 17px;
+            font-weight: bold;
+            position: sticky;
+            top: 0;
+            background-color: var(--bg-light);
+            width: 100%;
+            padding: 4px 0;
+            z-index: 2;
+            border-radius: 8px;
+        }
+        .dark .shop-title {
+            background-color: var(--bg-dark);
+        }
+
+        .shop-item {
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            padding: 10px;
+            margin-bottom: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        .dark .shop-item {
+            background-color: rgba(40, 40, 45, 0.9);
+        }
+        .shop-item.sold-out {
+            opacity: 0.5;
+            filter: grayscale(1);
+        }
+
+        .shop-item-title {
+            font-weight: bold;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .shop-item-description {
+            margin-bottom: 8px;
+            font-size: 11px;
+            line-height: 1.2;
+            color: #555;
+        }
+        .dark .shop-item-description { color: #aaa; }
+
+        .shop-item-price {
+            font-weight: bold;
+            color: #FFA000;
+            margin-bottom: 6px;
+            font-size: 14px;
+        }
+
+        .shop-item-stock {
+            font-size: 11px;
+            color: #888;
+            margin-bottom: 8px;
+        }
+
+        .buy-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            width: 100%;
+            transition: background-color 0.2s;
+        }
+        .buy-btn:hover { background-color: #4b4ab8; }
+        .buy-btn:disabled {
+            background-color: #999;
+            cursor: not-allowed;
         }
 
         .total-coins {
-            background: linear-gradient(135deg, #FFA000 0%, #FFC107 100%);
+            background-color: rgba(0, 0, 0, 0.6);
             color: white;
-            padding: 8px 20px;
-            border-radius: 30px;
+            padding: 6px 12px;
+            border-radius: 20px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 6px;
             position: absolute;
-            top: 25px;
-            right: 25px;
-            font-size: 20px;
-            font-weight: 800;
-            box-shadow: 0 4px 15px rgba(255, 160, 0, 0.4);
-            transition: transform 0.2s;
+            top: 12px;
+            right: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 3;
         }
 
-        .total-coins:hover {
-            transform: scale(1.05);
+        .vip-customize-pane .game-btn {
+            min-width: 34px;
         }
 
-        .coin-icon {
-            font-size: 22px;
-        }
-
-        /* Mobile Layout for Level Select */
-        @media (max-width: 600px) {
-            .level-selection-container {
-                flex-direction: column;
-                height: calc(100% - 70px);
-                gap: 10px;
+        /* Responsive Layout for iPad & iPhone */
+        @media (max-width: 768px) {
+            #level-screen h1 {
+                font-size: 20px;
+                margin: 12px 58px 6px 12px;
             }
-            .level-grid {
-                grid-template-columns: repeat(4, 1fr);
+            .level-selection-container {
+                display: grid;
+                grid-template-columns: 1fr;
+                grid-template-rows: auto minmax(0, 1fr) auto;
+                gap: 10px;
+                padding: 8px 10px 10px;
+            }
+            .vip-customize-pane {
+                order: 1;
+                max-height: 150px;
+            }
+            .level-grid-container {
+                order: 2;
+                min-height: 0;
+                padding-right: 2px;
             }
             .shop-container {
-                flex: unset;
-                height: 40%;
-                border-radius: 20px 20px 0 0;
-                margin: 0 -20px -20px;
+                order: 3;
+                max-height: 140px;
+            }
+            .level-grid {
+                grid-template-columns: repeat(auto-fill, minmax(58px, 1fr));
+                gap: 10px;
             }
             .total-coins {
-                top: 15px;
-                right: 15px;
-                font-size: 16px;
-                padding: 6px 15px;
-            }
-            h1 {
-                font-size: 24px;
-                margin: 20px 0 10px;
+                top: 10px;
+                right: 10px;
+                font-size: 13px;
+                padding: 5px 10px;
             }
         }
 
         /* Game Canvas */
         #game-canvas {
             background-color: skyblue;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            user-select: none;
         }
 
         #theme-overlay {
@@ -608,43 +565,52 @@
         /* On-screen controls */
         #touch-controls {
             position: absolute;
-            bottom: 50px;
+            bottom: 30px;
             left: 0;
             right: 0;
             display: none;
             justify-content: space-between;
             z-index: 10;
-            pointer-events: all;
+            pointer-events: none;
+            width: 100%;
+            padding: 0 10px;
+            box-sizing: border-box;
         }
 
         #direction-controls {
             display: flex;
-            margin-left: 20px;
             pointer-events: auto;
+            gap: 10px;
+            align-items: flex-end;
         }
 
         #action-controls {
             display: flex;
-            margin-right: 20px;
             pointer-events: auto;
             gap: 10px;
+            align-items: flex-end;
+            justify-content: flex-end;
         }
 
         .touch-btn {
-            width: 90px;
-            height: 90px;
+            width: 70px;
+            height: 70px;
             background-color: rgba(255, 255, 255, 0.3);
             border: 2px solid rgba(255, 255, 255, 0.5);
             border-radius: 50%;
-            font-size: 32px;
+            font-size: 24px;
             color: white;
             display: flex;
             justify-content: center;
             align-items: center;
             cursor: pointer;
             user-select: none;
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            touch-action: manipulation;
             -webkit-tap-highlight-color: transparent;
-            margin: 0 5px;
+            margin: 0;
+            flex-shrink: 0;
         }
 
         .touch-btn:active {
@@ -652,9 +618,9 @@
         }
 
         .touch-btn#jump-btn {
-            width: 120px;
-            height: 120px;
-            font-size: 36px;
+            width: 85px;
+            height: 85px;
+            font-size: 32px;
         }
 
         .touch-btn#shield-btn {
@@ -675,6 +641,20 @@
         .touch-btn.disabled {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+
+        /* Responsive iPhone/Android sizing for controls */
+        @media (max-width: 600px) {
+            #touch-controls { bottom: 15px; padding: 0 5px; }
+            #direction-controls, #action-controls { gap: 5px; }
+            .touch-btn { width: 50px; height: 50px; font-size: 18px; }
+            .touch-btn#jump-btn { width: 65px; height: 65px; font-size: 24px; }
+        }
+
+        @media (max-width: 400px) {
+            #direction-controls, #action-controls { gap: 3px; }
+            .touch-btn { width: 45px; height: 45px; font-size: 16px; border-width: 1px; }
+            .touch-btn#jump-btn { width: 55px; height: 55px; font-size: 20px; }
         }
 
         .crazy-mode-indicator {
@@ -786,7 +766,16 @@
             color: #007FFF !important;
         }
 
-    </style>
+    
+        #game-container {
+            -webkit-user-select: none;
+            -webkit-touch-callout: none;
+            user-select: none;
+        }
+
+        
+
+</style>
 </head>
 <body>
     <div id="game-container">
@@ -1433,6 +1422,8 @@ const bgm = document.getElementById('bgm');
         const gameState = {
             tramSchedule: [3,2,3,3,2,2,3,2,3,3,2,3,3,2,2,2,3,2,3,2,3,2,3,2,2,3,3,2,3,2,2,3,2,3,3,2,2,3,2],
             tramScheduleIndex: 0,
+            trainSchedule: [10,12,8,9,8,9,12,11,11,11,10,9,8,9,10,11,11,12,11,8,8,9,8],
+            trainScheduleIndex: 0,
             playerName: "",
             currentLevel: 0,
             completedLevels: new Set(),
@@ -1548,10 +1539,8 @@ const bgm = document.getElementById('bgm');
             if (e.key === 'ArrowLeft') keys.left = true;
             if (e.key === 'ArrowRight') keys.right = true;
             if (e.key === 'z' || e.key === 'Z' || e.key === ' ' || e.code === 'Space' || e.key === 'b' || e.key === 'B') {
-                if (!keys.jump) {
-                    keys.jump = true;
-                    tryJump();
-                }
+                keys.jump = true;
+                tryJump();
             }
             if (e.key === 'y' || e.key === 'Y') {
                 if (!keys.shield && !keys.shieldPressed && gameState.ownedProtectors > 0 && !gameState.shieldActive) {
@@ -1637,27 +1626,33 @@ const bgm = document.getElementById('bgm');
             });
 
             // Jump button
+            // Fixed touch handlers to prevent getting stuck
             jumpBtn.addEventListener('touchstart', (e) => {
                 e.preventDefault();
-                if (!keys.jump) {
-                    keys.jump = true;
-                    tryJump();
-                }
-            });
-            jumpBtn.addEventListener('touchend', () => {
+                keys.jump = true;
+                tryJump();
+            }, { passive: false });
+
+            jumpBtn.addEventListener('touchend', (e) => {
+                e.preventDefault();
                 keys.jump = false;
             });
+
+            jumpBtn.addEventListener('touchcancel', (e) => {
+                keys.jump = false;
+            });
+
             jumpBtn.addEventListener('mousedown', (e) => {
                 e.preventDefault();
-                if (!keys.jump) {
-                    keys.jump = true;
-                    tryJump();
-                }
+                keys.jump = true;
+                tryJump();
             });
-            jumpBtn.addEventListener('mouseup', () => {
+
+            jumpBtn.addEventListener('mouseup', (e) => {
                 keys.jump = false;
             });
-            jumpBtn.addEventListener('mouseleave', () => {
+
+            jumpBtn.addEventListener('mouseleave', (e) => {
                 keys.jump = false;
             });
 
@@ -1931,9 +1926,12 @@ const bgm = document.getElementById('bgm');
                     gameContainer.appendChild(legIndicator);
                 }
 
+                // Remove old VIP pane to prevent duplicates
+                const oldVipPane = document.querySelector('.vip-customize-pane');
+                if (oldVipPane) oldVipPane.remove();
+
                 const customizeContainer = document.createElement('div');
-                customizeContainer.className = 'shop-container';
-                customizeContainer.style.marginBottom = '20px';
+                customizeContainer.className = 'vip-customize-pane';
 
                 let title = 'VIP';
                 if (isVVIP) title = 'VVIP';
@@ -1985,7 +1983,12 @@ const bgm = document.getElementById('bgm');
 
                 const levelScreen = document.getElementById('level-screen');
                 const selContainer = levelScreen.querySelector('.level-selection-container');
-                selContainer.insertBefore(customizeContainer, selContainer.firstChild);
+                const gridCont = selContainer.querySelector('.level-grid-container');
+                if (gridCont) {
+                    selContainer.insertBefore(customizeContainer, gridCont);
+                } else {
+                    selContainer.appendChild(customizeContainer);
+                }
 
                 customizeContainer.querySelectorAll('.color-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
@@ -2615,7 +2618,10 @@ function updateGame() {
                 player.velocityX *= settings.friction;
             }
             
-            // Jumping is now handled via events (tryJump)
+            // Handle continuous jumping (bunny hop) if button/key is held
+            if (keys.jump) {
+                tryJump();
+            }
             
             // Handle shield activation
             if (keys.shieldPressed && (gameState.ownedProtectors > 0 || gameState.crazyMode) && !gameState.shieldActive) {
@@ -2759,12 +2765,15 @@ function updateGame() {
                 if (level.trainSpawnTimer !== undefined) {
                     level.trainSpawnTimer++;
                     if (level.trainSpawnTimer >= level.nextTrainFrames) {
+                        const carriages = gameState.trainSchedule[gameState.trainScheduleIndex % gameState.trainSchedule.length];
+                        gameState.trainScheduleIndex++;
                         level.trains.push({
                             x: settings.cameraOffset + canvas.width + 100,
                             y: level.groundLevel - 35,
-                            width: 525,
+                            width: carriages * 35,
                             height: 35,
-                            speed: 5 + Math.random() * 2
+                            speed: 5 + Math.random() * 2,
+                            numCarriages: carriages
                         });
                         level.trainSpawnTimer = 0;
                         level.nextTrainFrames = Math.floor(60 * (6.87 + Math.random() * (8.56 - 6.87)));
@@ -2813,7 +2822,9 @@ function updateGame() {
                                 width: isLongTram ? 105 : 70,
                                 height: 35,
                                 isLong: isLongTram,
-                                speed: (2.46 * 30) / 60
+                                speed: (2.46 * 30) / 60,
+                                distanceTravelled: 0,
+                                stopTimer: 0
                             });
                             level.tramPending = false;
                         }
@@ -2828,7 +2839,9 @@ function updateGame() {
                             width: isLongTram ? 105 : 70,
                             height: 35,
                             isLong: isLongTram,
-                            speed: (2.46 * 30) / 60
+                            speed: (2.46 * 30) / 60,
+                            distanceTravelled: 0,
+                            stopTimer: 0
                         });
                         level.tramSpawnTimer = 0;
                         level.nextTramFrames = Math.floor(60 * (3.0 + Math.random() * (4.22 - 3.0)));
@@ -2838,7 +2851,27 @@ function updateGame() {
 
             for (let i = level.trams.length - 1; i >= 0; i--) {
                 const tram = level.trams[i];
-                tram.x -= tram.speed;
+
+                // Calculate 12.23 pillars distance dynamically
+                let pillarDistance = 300; // Default fallback
+                if (level.pillars.length > 1) {
+                    pillarDistance = level.pillars[1].x - level.pillars[0].x;
+                }
+                const stopTarget = 12.23 * pillarDistance;
+
+                if (tram.stopTimer > 0) {
+                    tram.stopTimer--;
+                    if (tram.stopTimer <= 0) {
+                        tram.distanceTravelled = 0; // Reset distance to start looking for the next stop
+                    }
+                } else {
+                    tram.x -= tram.speed;
+                    tram.distanceTravelled += tram.speed;
+                    if (tram.distanceTravelled >= stopTarget) {
+                        tram.stopTimer = 180; // Stop for 3 seconds (180 frames at 60fps)
+                    }
+                }
+
                 if (tram.x + tram.width < settings.cameraOffset - 1500) {
                     level.trams.splice(i, 1);
                     continue;
@@ -3376,7 +3409,8 @@ function drawGame() {
                     ctx.font = '35px Arial';
                     ctx.textAlign = 'left';
                     ctx.textBaseline = 'bottom';
-                    ctx.fillText('🚃🚃🚃🚃🚃🚃🚃🚃🚃🚃🚃🚃🚃🚃🚃', train.x - settings.cameraOffset, train.y + train.height + 6);
+                    const trainStr = train.numCarriages === 8 ? '🚃🚃🚃🚃🚃🚃🚋🚃' : '🚃'.repeat(train.numCarriages);
+                    ctx.fillText(trainStr, train.x - settings.cameraOffset, train.y + train.height + 6);
                 }
             }
 

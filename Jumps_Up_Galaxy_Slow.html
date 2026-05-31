@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jumps Up</title>
+    <title>Jumps Up vg1.8.13</title>
     <style>
         :root {
             --primary: #3837A3;
@@ -775,13 +775,35 @@
 
         
 
+
+        #loading-screen {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: #000;
+            color: #8DB600; /* apple green */
+            font-family: 'Courier New', Courier, monospace;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            padding: 20px;
+            box-sizing: border-box;
+            font-size: 18px;
+            word-wrap: break-word;
+            word-break: break-all;
+            transition: opacity 0.5s ease;
+        }
 </style>
 </head>
 <body>
+    <div id="loading-screen">
+        <span id="loading-text">Generating code: </span><span id="binary-code"></span><span id="loading-cursor">_</span>
+    </div>
+
     <div id="game-container">
         <!-- Welcome Screen with Name Input -->
         <div id="welcome-screen">
-            <h1>Welcome to Jumps Up!</h1>
+            <h1>Welcome to Jumps Up! <span style="font-size: 16px; opacity: 0.7;">vg1.8.13</span></h1>
             <p style="margin-bottom: 5px;">Enter your name to start playing:</p>
             <input type="text" id="name-input" maxlength="15" placeholder="Your Name">
             <button class="game-btn" id="start-btn" style="margin-bottom: 25px;">Start Game</button>
@@ -795,7 +817,7 @@
         
         <!-- Level Selection Screen -->
         <div id="level-screen">
-            <h1>Jumps Up - Level Selection</h1>
+            <h1>Jumps Up <span style="font-size: 16px; opacity: 0.7;">vg1.8.13</span></h1>
             <div class="total-coins">
                 <span class="coin-icon">💷</span>
                 <span id="total-coins-display">0</span>
@@ -822,11 +844,18 @@
                         <div class="shop-item-stock">In Stock: <span id="medicine-stock">1</span></div>
                         <button class="buy-btn" id="buy-medicine-btn">Buy</button>
                     </div>
+                    <div class="shop-item" id="shop-teleporter">
+                        <div class="shop-item-title" style="transform: rotate(90deg); display: inline-block;">🕳️</div> <span style="font-weight: bold; font-size: 14px;">Teleporter</span>
+                        <div class="shop-item-description">51% chance to skip 16 pillars, 49% chance to warp to level 125!</div>
+                        <div class="shop-item-price">Price: 💷 15</div>
+                        <div class="shop-item-stock">In Stock: <span id="teleporter-stock">124</span></div>
+                        <button class="buy-btn" id="buy-teleporter-btn">Buy</button>
+                    </div>
                     <div class="shop-item" id="shop-heart">
                         <div class="shop-item-title">Extra Heart ❤️</div>
                         <div class="shop-item-description">Permanently adds one more life to your character.</div>
                         <div class="shop-item-price">Price: 💷 100</div>
-                        <div class="shop-item-stock">In Stock: <span id="heart-stock">3</span></div>
+                        <div class="shop-item-stock">In Stock: <span id="heart-stock">10</span></div>
                         <button class="buy-btn" id="buy-heart-btn">Buy</button>
                     </div>
                 </div>
@@ -875,6 +904,7 @@
                 <button class="touch-btn" id="right-btn">→</button>
             </div>
             <div id="action-controls">
+                <button class="touch-btn" id="teleporter-btn" style="transform: rotate(90deg);">🕳️</button>
                 <button class="touch-btn" id="heart-btn">❤️</button>
                 <button class="touch-btn" id="medicine-btn">💊</button>
                 <button class="touch-btn" id="shield-btn">🛡️</button>
@@ -885,12 +915,15 @@
         <div id="game-over">
             <h2>Game Over</h2>
             <p id="game-over-message">You ran out of lives!</p>
+            <button class="game-btn" id="try-again-btn" style="margin-bottom: 10px;">Try Again</button>
             <button class="game-btn" id="retry-btn">Return to Level Selection</button>
         </div>
 
         <div id="win-screen">
             <h2>Level Complete!</h2>
             <p id="win-message">You collected the key!</p>
+            <button class="game-btn" id="crown-btn" style="display: none; background-color: #ffeb3b; border-color: #fbc02d; font-size: 24px; margin-bottom: 10px; width: 100%;">👑</button>
+            <button class="game-btn" id="gift-btn" style="display: none; background-color: #ff9800; border-color: #f57c00; font-size: 24px; margin-bottom: 10px; width: 100%;">🎁</button>
             <button class="game-btn" id="next-level-btn">Next Level</button>
             <button class="game-btn" id="return-btn">Return to Level Selection</button>
         </div>
@@ -941,6 +974,69 @@
     </div>
 
     <script>
+
+        // Handle loading screen with dynamic "AI Generation" typing effect
+        let cursorInterval = null;
+        function showHackerLoadingScreen(onComplete) {
+            let ls = document.getElementById('loading-screen');
+            if (!ls) {
+                ls = document.createElement('div');
+                ls.id = 'loading-screen';
+                ls.innerHTML = '<span id="loading-text">Generating code: </span><span id="binary-code"></span><span id="loading-cursor">_</span>';
+                document.body.appendChild(ls);
+            }
+
+            ls.style.display = 'flex';
+            ls.style.opacity = '1';
+
+            const binarySpan = document.getElementById('binary-code');
+            binarySpan.textContent = ''; // reset text
+            const targetCode = "1010101011010010110101101010110110110101011010010101010000101010111111110101001100101110010110101010010______R1 G76 B9 javascript press_Z/B/space to jump_ _1001010101010101010000101010101100101010101010100000000110011111111110010011111110010101010101000101010101101010101010110101101101111111111111111101010000000001001010000010101001111111101010010110101101011010100100000_ Completed 289 steps. ::::::::::::::::::::::::------------seQUenCE lolaccounts--------- 99x99=9801------___deniselove100101010110101010--Completed 340 steps character.customisation.station Jumps_Up_Win_Streak_Fixed getonthis_underway---Completed 428.6 steps_ _ _ _ _ Kalebispoopoo qwertyuiopasdfghjklzxcvbnm+ analyze---- Completed 586.669123 steps. RGBRGBRGBRBGRGBRGGRGRRBRGRBRGRGRBRGRBRGRBRGRBGRBRGRBGRBBBBGYRBCGBRGYBCBRYCBYGBCGBRYBCKKKKKKKKKKKKKKKGRCBGRYCCRCRKKKKKKCKRKCRCRKCRKKCRCRKCRKCRCRKCRKCRBJKKBCRCKBRCBKRBKCRCRKBBKCRCKBRKBCRCBKRBKCRKRBCCBKRBKCRCRKBKKRRGGGGGGGRCGCRGRGGRGRGRGKGKKGKGGKGKKGKGMGMGMMMMMGMMGMMMCMMCCMMMMCYYYBCYCBGRGB______________-0101010101101010101001010101010101010100100101000101010101010110101010101010101010001101010101011010100101010111010010101010101101010101001010101010101010100100101000101010101010101101010101001010101010101010100100101000101010101010110101010101010101010001101010101011010100101010111010010100101001010010101010110101010100101010101010101010010010100010101010101011010101010101010101000110101010101101010010101011101001-------Completed 999 steps chracterjumpwidthis400micropixels     Research completed, good to go guys!!";
+            let index = 0;
+
+            // Blinking cursor logic
+            if (cursorInterval) clearInterval(cursorInterval);
+            cursorInterval = setInterval(() => {
+                const cursor = document.getElementById('loading-cursor');
+                if (cursor) {
+                    cursor.style.opacity = cursor.style.opacity === '0' ? '1' : '0';
+                }
+            }, 400);
+
+            // Generate chunks rapidly like an LLM streaming tokens
+            function typeBinary() {
+                if (index < targetCode.length) {
+                    // Type between 2 and 6 characters at a time to simulate token streaming chunks
+                    const chunkSize = Math.floor(Math.random() * 5) + 2;
+                    binarySpan.textContent += targetCode.substring(index, index + chunkSize);
+                    index += chunkSize;
+
+                    // Random delay between chunks (10ms to 40ms)
+                    const delay = Math.floor(Math.random() * 30) + 10;
+                    setTimeout(typeBinary, delay);
+                } else {
+                    // Finished generating, fade out
+                    setTimeout(() => {
+                        const ls = document.getElementById('loading-screen');
+                        if(ls) {
+                            ls.style.opacity = '0';
+                            setTimeout(() => {
+                                ls.style.display = 'none';
+                                if (onComplete) onComplete();
+                            }, 500);
+                        }
+                    }, 800);
+                }
+            }
+
+            // Start typing after a tiny delay
+            setTimeout(typeBinary, 300);
+        }
+
+        window.addEventListener('load', () => {
+            // Binary loading screen removed
+        });
+
         // Check for dark mode preference
         if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
             document.documentElement.classList.add('dark');
@@ -965,7 +1061,10 @@
         const gameUI = document.getElementById('game-ui');
         const gameOverScreen = document.getElementById('game-over');
         const winScreen = document.getElementById('win-screen');
+        const tryAgainBtn = document.getElementById('try-again-btn');
+        const giftBtn = document.getElementById('gift-btn');
         const retryBtn = document.getElementById('retry-btn');
+        const crownBtn = document.getElementById('crown-btn');
         const nextLevelBtn = document.getElementById('next-level-btn');
         const returnBtn = document.getElementById('return-btn');
         const backBtn = document.getElementById('back-btn');
@@ -987,6 +1086,9 @@
         const buyProtectorBtn = document.getElementById('buy-protector-btn');
         const buyMedicineBtn = document.getElementById('buy-medicine-btn');
         const buyHeartBtn = document.getElementById('buy-heart-btn');
+        const buyTeleporterBtn = document.getElementById('buy-teleporter-btn');
+        const teleporterBtn = document.getElementById('teleporter-btn');
+        const teleporterStockDisplay = document.getElementById('teleporter-stock');
         const shopHeartItem = document.getElementById('shop-heart');
         const levelAnnouncement = document.getElementById('level-announcement');
         const winMessage = document.getElementById('win-message');
@@ -1422,7 +1524,7 @@ const bgm = document.getElementById('bgm');
         const gameState = {
             tramSchedule: [3,2,3,3,2,2,3,2,3,3,2,3,3,2,2,2,3,2,3,2,3,2,3,2,2,3,3,2,3,2,2,3,2,3,3,2,2,3,2],
             tramScheduleIndex: 0,
-            trainSchedule: [10,12,8,9,8,9,12,11,11,11,10,9,8,9,10,11,11,12,11,8,8,9,8],
+            trainSchedule: [8,8,9,12,11,11,10,10,6,5,5,7,7,8,9,11,10,10,13,12],
             trainScheduleIndex: 0,
             playerName: "",
             currentLevel: 0,
@@ -1435,11 +1537,15 @@ const bgm = document.getElementById('bgm');
             ownedProtectors: 0,
             ownedMedicine: 0,
             ownedHearts: 0,
+            ownedTeleporter: 0,
             shieldActive: false,
             medicineActive: false,
             protectorStock: 2,
             medicineStock: 1,
-            heartStock: 3, // Heart stock - limited to 3 with no refill
+            teleporterStock: 124,
+            heartStock: 10, // Heart stock - limited to 10 with no refill
+            ownedAccessories: { cap: false, pants: false, shirt: false },
+            equippedAccessories: { cap: false, pants: false, shirt: false },
             levelCoinsCollected: 0,
             gameInterval: null,
             animationFrame: null,
@@ -1502,7 +1608,7 @@ const bgm = document.getElementById('bgm');
             for (let i = 1; i <= settings.totalLevels; i++) {
                 const numPillars = settings.baseNumPillars + (i - 1) * 2;
                 const lavaCount = Math.floor(Math.random() * 5) + 1; // Random 1-5 lava pools
-                const coinCount = 5;
+                const coinCount = 7;
                 const heartCount = (i % 2 === 0) ? 1 : 0; // Hearts only in even-numbered levels
                 const endType = (i === settings.totalLevels) ? 'bigCoin' : 'key';
                 
@@ -1531,13 +1637,22 @@ const bgm = document.getElementById('bgm');
             jumpPressed: false, // Track if jump was just pressed
             shieldPressed: false, // Track if shield was just pressed
             medicinePressed: false, // Track if medicine was just pressed
-            heartPressed: false // Track if heart was just pressed
+            heartPressed: false, // Track if heart was just pressed
+            teleporter: false,
+            teleporterPressed: false,
+            autoMovePressed: false
         };
 
         document.addEventListener('keydown', (e) => {
             if (e.key === ' ' || e.code === 'Space' || e.key.startsWith('Arrow')) e.preventDefault();
             if (e.key === 'ArrowLeft') keys.left = true;
             if (e.key === 'ArrowRight') keys.right = true;
+            if (e.key === 'a' || e.key === 'A') {
+                if (!keys.autoMovePressed) {
+                    gameState.autoMoveActive = !gameState.autoMoveActive; // Toggle Auto Clicker
+                    keys.autoMovePressed = true;
+                }
+            }
             if (e.key === 'z' || e.key === 'Z' || e.key === ' ' || e.code === 'Space' || e.key === 'b' || e.key === 'B') {
                 keys.jump = true;
                 tryJump();
@@ -1560,11 +1675,20 @@ const bgm = document.getElementById('bgm');
                 }
                 keys.heart = true;
             }
+            if (e.key === 't' || e.key === 'T') {
+                if (!keys.teleporter && !keys.teleporterPressed && gameState.ownedTeleporter > 0) {
+                    keys.teleporterPressed = true;
+                }
+                keys.teleporter = true;
+            }
         });
 
         document.addEventListener('keyup', (e) => {
             if (e.key === 'ArrowLeft') keys.left = false;
             if (e.key === 'ArrowRight') keys.right = false;
+            if (e.key === 'a' || e.key === 'A') {
+                keys.autoMovePressed = false;
+            }
             if (e.key === 'z' || e.key === 'Z' || e.key === ' ' || e.code === 'Space' || e.key === 'b' || e.key === 'B') {
                 keys.jump = false;
                 keys.jumpPressed = false;
@@ -1742,6 +1866,37 @@ const bgm = document.getElementById('bgm');
                 keys.heart = false;
                 keys.heartPressed = false;
             });
+
+            if (teleporterBtn) {
+                teleporterBtn.addEventListener('touchstart', (e) => {
+                    e.preventDefault();
+                    if (!keys.teleporter && !keys.teleporterPressed && gameState.ownedTeleporter > 0) {
+                        keys.teleporterPressed = true;
+                        activateTeleporter();
+                    }
+                    keys.teleporter = true;
+                });
+                teleporterBtn.addEventListener('touchend', () => {
+                    keys.teleporter = false;
+                    keys.teleporterPressed = false;
+                });
+                teleporterBtn.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    if (!keys.teleporter && !keys.teleporterPressed && gameState.ownedTeleporter > 0) {
+                        keys.teleporterPressed = true;
+                        activateTeleporter();
+                    }
+                    keys.teleporter = true;
+                });
+                teleporterBtn.addEventListener('mouseup', () => {
+                    keys.teleporter = false;
+                    keys.teleporterPressed = false;
+                });
+                teleporterBtn.addEventListener('mouseleave', () => {
+                    keys.teleporter = false;
+                    keys.teleporterPressed = false;
+                });
+            }
         }
 
         // Update the shield button state
@@ -1768,6 +1923,14 @@ const bgm = document.getElementById('bgm');
                 heartBtn.classList.remove('disabled');
             } else {
                 heartBtn.classList.add('disabled');
+            }
+        }
+
+        function updateTeleporterButton() {
+            if (gameState.ownedTeleporter > 0 || gameState.crazyMode) {
+                teleporterBtn.classList.remove('disabled');
+            } else {
+                teleporterBtn.classList.add('disabled');
             }
         }
 
@@ -1802,6 +1965,42 @@ const bgm = document.getElementById('bgm');
                 playSound(heartSound);
                 updateLivesUI();
                 updateHeartButton();
+                if(typeof updateTeleporterButton !== "undefined") updateTeleporterButton();
+            }
+        }
+
+        function activateTeleporter() {
+            if (!gameState.gameRunning) return;
+            if (gameState.ownedTeleporter > 0 || gameState.crazyMode) {
+                if (!gameState.crazyMode) {
+                    gameState.ownedTeleporter--;
+                }
+
+                if (typeof updateTeleporterButton !== 'undefined') updateTeleporterButton();
+
+                const rand = Math.random();
+                if (rand < 0.51) {
+                    // Skip 16 pillars
+                    let nextPillarIndex = -1;
+                    for (let i = 0; i < level.pillars.length; i++) {
+                        if (level.pillars[i].x > player.x) {
+                            nextPillarIndex = i;
+                            break;
+                        }
+                    }
+                    if (nextPillarIndex !== -1) {
+                        let targetIndex = Math.min(nextPillarIndex + 16, level.pillars.length - 1);
+                        let targetPillar = level.pillars[targetIndex];
+                        player.x = targetPillar.x + targetPillar.width / 2;
+                        player.y = targetPillar.y - player.height * player.sizeMultiplier - 10;
+                        settings.cameraOffset = player.x - canvas.width * 0.3; 
+                        if (typeof coinSound !== 'undefined') playSound(coinSound);
+                    }
+                } else {
+                    // Warp to level 125
+                    gameState.completedLevels.add(gameState.currentLevel);
+                    startLevel(125);
+                }
             }
         }
 
@@ -1877,7 +2076,27 @@ const bgm = document.getElementById('bgm');
             
             // Hide game buttons
             document.querySelector('.game-buttons').style.display = 'none';
-            
+
+            // Track deaths for dynamic button text
+            if (typeof gameState.consecutiveDeaths === 'undefined') gameState.consecutiveDeaths = 0;
+            gameState.consecutiveDeaths++;
+
+            if (gameState.consecutiveDeaths === 2) {
+                tryAgainBtn.style.display = 'block';
+                tryAgainBtn.textContent = 'THIRD TIME LUCKY?';
+                gameOverMessage.textContent = "You ran out of lives!";
+                retryBtn.textContent = "RETURN TO LEVEL SELECTION";
+            } else if (gameState.consecutiveDeaths >= 3) {
+                tryAgainBtn.style.display = 'none';
+                gameOverMessage.textContent = "AWW, TOO BAD, BUT IT BACK TO THE LEVEL SELECTION.";
+                retryBtn.textContent = "RETURN TO LEVEL SELECTION";
+            } else {
+                tryAgainBtn.style.display = 'block';
+                tryAgainBtn.textContent = 'TRY AGAIN';
+                gameOverMessage.textContent = "You ran out of lives!";
+                retryBtn.textContent = "RETURN TO LEVEL SELECTION";
+            }
+
             gameOverScreen.style.display = 'flex';
         }
 
@@ -1942,9 +2161,16 @@ const bgm = document.getElementById('bgm');
                     <div style="margin-bottom: 10px;">
                         <p style="margin-bottom: 5px;">Pick a Single Colour:</p>
                         <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                            ${['#f44336','#ff9800','#ffeb3b','#4caf50','#2196f3','#9c27b0','#795548','#ffffff', '#000000'].map(c => 
-                                `<button class="game-btn color-btn" style="min-width: 35px; height: 35px; padding: 0; background: ${c}; border: 2px solid white; border-radius: 5px;" data-color="${c}"></button>`
-                            ).join('')}
+                            ${( (isVVIP || isLegendary) 
+                                ? ['#f44336', '#ff9800', '#ffeb3b', '#4caf50', '#00bcd4', '#2196f3', '#9c27b0', '#e91e63', '#000000', '#ffffff', '#FFD700', '#C0C0C0', '#CD7F32']
+                                : ['#f44336', '#ff9800', '#ffeb3b', '#4caf50', '#00bcd4', '#2196f3', '#9c27b0', '#e91e63', '#000000', '#ffffff']
+                            ).map(c => {
+                                let bg = c;
+                                if (c === '#FFD700') bg = 'linear-gradient(135deg, #FFDF00 0%, #D4AF37 50%, #996515 100%)'; // Gold
+                                if (c === '#C0C0C0') bg = 'linear-gradient(135deg, #E5E4E2 0%, #C0C0C0 50%, #808080 100%)'; // Silver
+                                if (c === '#CD7F32') bg = 'linear-gradient(135deg, #CD7F32 0%, #A0522D 50%, #613613 100%)'; // Bronze
+                                return `<button class="game-btn color-btn" style="min-width: 35px; height: 35px; padding: 0; background: ${bg}; border: 2px solid white; border-radius: 0px;" data-color="${c}"></button>`;
+                            }).join('')}
                         </div>
                     </div>`;
 
@@ -1953,16 +2179,45 @@ const bgm = document.getElementById('bgm');
                         <p style="margin-bottom: 5px;">Pick Double Colours (Legendary Only):</p>
                         <div style="display: flex; gap: 5px; flex-wrap: wrap;">
                             ${[
-                                {c1:'#2196f3', c2:'#f44336'}, // Blue/Red
+                                {c1:'#f44336', c2:'#2196f3'}, // Red/Blue
                                 {c1:'#ffeb3b', c2:'#4caf50'}, // Yellow/Green
                                 {c1:'#9c27b0', c2:'#ff9800'}, // Purple/Orange
                                 {c1:'#ffffff', c2:'#000000'}, // White/Black
                                 {c1:'#2196f3', c2:'#795548'}, // Blue/Brown
                                 {c1:'#ffeb3b', c2:'#f44336'}, // Yellow/Red
-                                {c1:'#4caf50', c2:'#9c27b0'}  // Green/Purple
-                            ].map(pair => 
-                                `<button class="game-btn dual-color-btn" style="min-width: 45px; height: 35px; padding: 0; background: linear-gradient(135deg, ${pair.c1} 50%, ${pair.c2} 50%); border: 2px solid white; border-radius: 5px;" data-c1="${pair.c1}" data-c2="${pair.c2}"></button>`
-                            ).join('')}
+                                {c1:'#4caf50', c2:'#9c27b0'}, // Green/Purple
+                                {c1:'#e91e63', c2:'#ff9800'}, // Pink/Orange
+                                {c1:'#9e9e9e', c2:'#000000'}, // Grey/Black
+                                {c1:'#00bcd4', c2:'#ffeb3b'}, // Cyan/Yellow
+                                {c1:'#9c27b0', c2:'#e91e63'}, // Purple/Pink
+                                {c1:'#f44336', c2:'#ff9800'}, // Red/Orange
+                                {c1:'#00bcd4', c2:'#ffffff'}, // Cyan/White
+                                {c1:'#FFD700', c2:'#C0C0C0'}, // Gold/Silver
+                                {c1:'#C0C0C0', c2:'#CD7F32'}, // Silver/Bronze
+                                {c1:'#CD7F32', c2:'#FFD700'}, // Bronze/Gold
+                                {c1:'#ffffff', c2:'#e91e63'}, // White/Pink
+                                {c1:'#FFD700', c2:'#ffeb3b'}, // Gold/Yellow
+                                {c1:'#4caf50', c2:'#2196f3'}, // Green/Blue
+                                {c1:'#C0C0C0', c2:'#00bcd4'}, // Silver/Cyan
+                                {c1:'#CD7F32', c2:'#9e9e9e'}, // Bronze/Grey
+                                {c1:'#9e9e9e', c2:'#9c27b0'}, // Grey/Purple
+                                {c1:'#f44336', c2:'#e91e63'}, // Red/Pink
+                                {c1:'#ff9800', c2:'#FFD700'}  // Orange/Gold
+                            ].map(pair => {
+                                const isShiny1 = ['#FFD700', '#C0C0C0', '#CD7F32'].includes(pair.c1);
+                                const isShiny2 = ['#FFD700', '#C0C0C0', '#CD7F32'].includes(pair.c2);
+                                let bgStyle;
+                                if (isShiny1 || isShiny2) {
+                                    const c1Top = isShiny1 ? (pair.c1==='#FFD700'?'#FFDF00':pair.c1==='#C0C0C0'?'#E5E4E2':'#CD7F32') : pair.c1;
+                                    const c1Bot = isShiny1 ? (pair.c1==='#FFD700'?'#996515':pair.c1==='#C0C0C0'?'#808080':'#613613') : pair.c1;
+                                    const c2Top = isShiny2 ? (pair.c2==='#FFD700'?'#FFDF00':pair.c2==='#C0C0C0'?'#E5E4E2':'#CD7F32') : pair.c2;
+                                    const c2Bot = isShiny2 ? (pair.c2==='#FFD700'?'#996515':pair.c2==='#C0C0C0'?'#808080':'#613613') : pair.c2;
+                                    bgStyle = `linear-gradient(135deg, ${c1Top} 0%, ${c1Bot} 50%, ${c2Top} 50%, ${c2Bot} 100%)`;
+                                } else {
+                                    bgStyle = `linear-gradient(135deg, ${pair.c1} 50%, ${pair.c2} 50%)`;
+                                }
+                                return `<button class="game-btn dual-color-btn" style="min-width: 45px; height: 35px; padding: 0; background: ${bgStyle}; border: 2px solid white; border-radius: 0px;" data-c1="${pair.c1}" data-c2="${pair.c2}"></button>`;
+                            }).join('')}
                         </div>
                     </div>`;
                 }
@@ -1970,10 +2225,28 @@ const bgm = document.getElementById('bgm');
                 if (isVVIP || isLegendary) {
                     uiHtml += `<div>
                         <p style="margin-bottom: 5px;">Pick a Character:</p>
-                        <div style="display: flex; gap: 5px; flex-wrap: wrap;">
-                            ${['👧🏼','👦🏼','👩🏻','🧑🏽','👮🏻‍♀️','💂🏼‍♂️','👩🏻‍🌾','🐶','🐱','🐷','🐮','🐴','🐸', 'NONE'].map(e => 
+                        <div style="display: flex; gap: 5px; flex-wrap: wrap; margin-bottom: 10px;">
+                            ${['👧🏼','👦🏼','👩🏻','🧑🏽','👮🏻‍♀️','💂🏼‍♂️','👩🏻‍🌾','🐶','🐱','🐷','🐮','🐴','🐸', '♟️', '♞', '♝', '♜', '♛', '♚', 'NONE'].map(e => 
                                 `<button class="game-btn emoji-btn" style="min-width: 40px; height: 40px; padding: 0; font-size: 20px;" data-emoji="${e === 'NONE' ? '' : e}">${e === 'NONE' ? '❌' : e}</button>`
                             ).join('')}
+                        </div>
+                    </div>`;
+
+                    uiHtml += `<div>
+                        <p style="margin-bottom: 5px;">Accessories:</p>
+                        <div style="display: flex; flex-direction: column; gap: 8px;">
+                            <button class="game-btn acc-btn" data-acc="cap" data-cost="32" style="font-size: 16px; display: flex; justify-content: space-between; padding: 5px 10px;">
+                                <span>🧢 Cap</span>
+                                <span class="acc-cost">${gameState.ownedAccessories && gameState.ownedAccessories.cap ? (gameState.equippedAccessories.cap ? 'Equipped' : 'Equip') : '💷 32'}</span>
+                            </button>
+                            <button class="game-btn acc-btn" data-acc="shirt" data-cost="24" style="font-size: 16px; display: flex; justify-content: space-between; padding: 5px 10px;">
+                                <span>👕 Shirt</span>
+                                <span class="acc-cost">${gameState.ownedAccessories && gameState.ownedAccessories.shirt ? (gameState.equippedAccessories.shirt ? 'Equipped' : 'Equip') : '💷 24'}</span>
+                            </button>
+                            <button class="game-btn acc-btn" data-acc="pants" data-cost="10" style="font-size: 16px; display: flex; justify-content: space-between; padding: 5px 10px;">
+                                <span>👖 Pants</span>
+                                <span class="acc-cost">${gameState.ownedAccessories && gameState.ownedAccessories.pants ? (gameState.equippedAccessories.pants ? 'Equipped' : 'Equip') : '💷 10'}</span>
+                            </button>
                         </div>
                     </div>`;
                 }
@@ -2014,6 +2287,38 @@ const bgm = document.getElementById('bgm');
                             const em = btn.getAttribute('data-emoji');
                             playerCustomEmoji = em ? em : null;
                             if (typeof coinSound !== 'undefined' && coinSound.play) coinSound.play().catch(()=>{});
+                        });
+                    });
+
+                    customizeContainer.querySelectorAll('.acc-btn').forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            if (!gameState.ownedAccessories) return;
+
+                            const acc = btn.getAttribute('data-acc');
+                            const cost = parseInt(btn.getAttribute('data-cost'));
+                            const costSpan = btn.querySelector('.acc-cost');
+
+                            if (gameState.ownedAccessories[acc]) {
+                                // Toggle equip
+                                gameState.equippedAccessories[acc] = !gameState.equippedAccessories[acc];
+                                costSpan.textContent = gameState.equippedAccessories[acc] ? 'Equipped' : 'Equip';
+                                if (typeof coinSound !== 'undefined' && coinSound.play) coinSound.play().catch(()=>{});
+                            } else {
+                                // Try to buy
+                                if (gameState.totalCoins >= cost) {
+                                    gameState.totalCoins -= cost;
+                                    gameState.ownedAccessories[acc] = true;
+                                    gameState.equippedAccessories[acc] = true; // Auto equip on buy
+                                    costSpan.textContent = 'Equipped';
+                                    updateTotalCoinsDisplay();
+                                    if (typeof coinSound !== 'undefined' && coinSound.play) coinSound.play().catch(()=>{});
+                                } else {
+                                    // Not enough coins
+                                    const originalBg = btn.style.backgroundColor;
+                                    btn.style.backgroundColor = '#f44336';
+                                    setTimeout(() => btn.style.backgroundColor = originalBg, 300);
+                                }
+                            }
                         });
                     });
                 }
@@ -2118,6 +2423,29 @@ const bgm = document.getElementById('bgm');
                     }
                 }
             });
+
+            buyTeleporterBtn.addEventListener('click', () => {
+                if (gameState.crazyMode || (gameState.totalCoins >= 15 && gameState.teleporterStock > 0)) {
+                    if (!gameState.crazyMode) {
+                        gameState.totalCoins -= 15;
+                        gameState.teleporterStock--;
+                    }
+                    gameState.ownedTeleporter++;
+
+                    updateTotalCoinsDisplay();
+                    if(typeof updateTeleporterButton !== "undefined") updateTeleporterButton();
+                    if(teleporterStockDisplay) {
+                        teleporterStockDisplay.textContent = gameState.crazyMode ? '∞' : gameState.teleporterStock;
+                    }
+                    if (gameState.totalCoins < 15 || gameState.teleporterStock === 0) {
+                        buyTeleporterBtn.disabled = true;
+                    }
+                    if (gameState.teleporterStock === 0 && !gameState.crazyMode) {
+                        document.getElementById('shop-teleporter').classList.add('sold-out');
+                    }
+                    if (typeof medicineSound !== 'undefined') playSound(medicineSound);
+                }
+            });
         }
 
         // Update protector stock display
@@ -2200,6 +2528,9 @@ const bgm = document.getElementById('bgm');
 
         // Initialize retry, next level, and return buttons
         retryBtn.addEventListener('click', returnToLevelSelection);
+        tryAgainBtn.addEventListener('click', () => {
+            startLevel(gameState.currentLevel);
+        });
         nextLevelBtn.addEventListener('click', () => {
             if (gameState.currentLevel < settings.totalLevels) {
                 startLevel(gameState.currentLevel + 1);
@@ -2208,6 +2539,59 @@ const bgm = document.getElementById('bgm');
             }
         });
         returnBtn.addEventListener('click', returnToLevelSelection);
+        crownBtn.addEventListener('click', () => {
+            gameState.totalCoins += 250000;
+            updateTotalCoinsDisplay();
+            playACEA();
+
+            // Show +250000 animation
+            const bonusText = document.createElement('div');
+            bonusText.textContent = '+250000 💷';
+            bonusText.style.position = 'absolute';
+            bonusText.style.color = '#FFD700';
+            bonusText.style.fontWeight = 'bold';
+            bonusText.style.fontSize = '36px';
+            bonusText.style.zIndex = '100';
+            bonusText.style.textShadow = '2px 2px 0 #000';
+            bonusText.style.animation = 'floatUpAndFade 2s forwards';
+
+            const rect = crownBtn.getBoundingClientRect();
+            bonusText.style.left = (rect.left + rect.width / 2 - 50) + 'px';
+            bonusText.style.top = rect.top + 'px';
+            document.body.appendChild(bonusText);
+
+            setTimeout(() => bonusText.remove(), 2000);
+
+            crownBtn.style.display = 'none';
+        });
+
+        giftBtn.addEventListener('click', () => {
+            gameState.totalCoins += 15;
+            updateTotalCoinsDisplay();
+            if (typeof coinSound !== 'undefined') playSound(coinSound);
+
+            // Show +15 animation
+            const bonusText = document.createElement('div');
+            bonusText.textContent = '+15 💷';
+            bonusText.style.position = 'absolute';
+            bonusText.style.color = '#FFA000';
+            bonusText.style.fontWeight = 'bold';
+            bonusText.style.fontSize = '32px';
+            bonusText.style.zIndex = '100';
+            bonusText.style.textShadow = '2px 2px 0 #fff, -2px -2px 0 #fff, 2px -2px 0 #fff, -2px 2px 0 #fff';
+            bonusText.style.animation = 'floatUpAndFade 1.5s forwards';
+
+            // Append and position relative to the gift button
+            const rect = giftBtn.getBoundingClientRect();
+            bonusText.style.left = (rect.left + rect.width / 2 - 30) + 'px';
+            bonusText.style.top = rect.top + 'px';
+            document.body.appendChild(bonusText);
+
+            setTimeout(() => bonusText.remove(), 1500);
+
+            giftBtn.style.display = 'none';
+            gameState.consecutiveWins = 0;
+        });
 
         // Generate level buttons
         function generateLevelButtons() {
@@ -2217,24 +2601,34 @@ const bgm = document.getElementById('bgm');
                 const levelBtn = document.createElement('button');
                 levelBtn.className = 'level-btn';
                 
-                // Only first 3 levels are initially unlocked (or all in crazy mode)
-                // Levels fully unlocked
-                //     levelBtn.classList.add('locked');
-                // }
+                // Check VIP accounts
+                const name = gameState.playerName.toLowerCase();
+                const isVIP = (name === "dogman" || name === "lg" || name === "be" || name === "goldun");
+
+                let isLocked = false;
+                if (!isVIP && i >= 6) {
+                    // Level 6 unlocks when Level 5 is completed. Level 7 unlocks when Level 6 is completed.
+                    if (!gameState.completedLevels.has(i - 1)) {
+                        isLocked = true;
+                        levelBtn.classList.add('locked');
+                    }
+                }
                 
                 levelBtn.setAttribute('data-level', i);
+                let statusText = gameState.completedLevels.has(i) ? 'Completed' : 'Ready';
+                if (isLocked) statusText = 'Locked';
+
                 levelBtn.innerHTML = `
                     <div class="level-number">${i}</div>
-                    <div class="level-status">${gameState.completedLevels.has(i) ? 'Completed' : 'Ready'}</div>
+                    <div class="level-status">${statusText}</div>
                 `;
                 
                 levelBtn.addEventListener('click', () => {
                     const levelNum = parseInt(levelBtn.getAttribute('data-level'));
                     
-                    // Can't play locked levels (unless in crazy mode)
-                    // Levels fully unlocked
-                    //     return;
-                    // }
+                    if (levelBtn.classList.contains('locked')) {
+                        return;
+                    }
                     
                     startLevel(levelNum);
                 });
@@ -2251,7 +2645,7 @@ const bgm = document.getElementById('bgm');
         
         // Show level announcement
         function showLevelAnnouncement(levelNum) {
-            levelAnnouncement.textContent = `Level ${levelNum}`;
+            levelAnnouncement.innerHTML = `Level ${levelNum} <div style='font-size: 20px; opacity: 0.7; margin-top: 10px;'>Jumps Up vg1.8.13</div>`;
             levelAnnouncement.style.display = 'flex';
             
             setTimeout(() => {
@@ -2261,7 +2655,62 @@ const bgm = document.getElementById('bgm');
 
         // Game functions
         function startLevel(levelNum) {
+            // Binary loading screens completely removed
+            executeStartLevel(levelNum);
+        }
+
+        function executeStartLevel(levelNum) {
             gameState.currentLevel = levelNum;
+
+            // Random Hack Event for specific levels
+            const hackRiskLevels = [23, 45, 54, 55, 78, 87, 88, 89, 92];
+            if (hackRiskLevels.includes(levelNum)) {
+                // Create the on-screen overlay if it doesn't exist
+                let hackScreen = document.getElementById('hack-alert-screen');
+                if (!hackScreen) {
+                    hackScreen = document.createElement('div');
+                    hackScreen.id = 'hack-alert-screen';
+                    hackScreen.style.cssText = 'display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 100000; align-items: center; justify-content: center; font-family: "Courier New", monospace; font-size: 40px; text-align: center; font-weight: bold; padding: 20px; flex-direction: column;';
+                    document.body.appendChild(hackScreen);
+                }
+
+                hackScreen.style.display = 'flex';
+
+                // Implement deterministic hack sequence based on user string
+                if (typeof gameState.hackSequenceIndex === 'undefined') {
+                    gameState.hackSequenceIndex = 0;
+                    gameState.hackSequence = "huhuuhuhuhuhhuhuhuhhhhhuuhuhuhuhhuuuuuuuuuuuuhuhuhuhhuuhhhhhhhuhuhuhuhuhhhhh";
+                }
+
+                const currentHackChar = gameState.hackSequence[gameState.hackSequenceIndex % gameState.hackSequence.length];
+                gameState.hackSequenceIndex++;
+
+                if (currentHackChar === 'h') {
+                    // 46% chance to lose all money
+                    gameState.totalCoins = 0;
+                    hackScreen.style.backgroundColor = '#8B0000'; // Dark Red
+                    hackScreen.style.color = '#FFFFFF';
+                    hackScreen.innerHTML = 'YOU ARE HACKED!!';
+                } else {
+                    // 54% chance to gain money from specific users
+                    const donors = ["DOGMAN", "Una", "cranberry@roblox", "Tac-O-caT", "LYNKsley@stealarainrot", "ArthurGG.2015", "Johnecenacat", "literrontheroadM1", "Harry", "Hanrey2", "AppleQuest", "Canman8o_^%", "strawberri@asd", "193jjfan_67", "bobodogg21"];
+                    const donor = donors[Math.floor(Math.random() * donors.length)];
+                    const gainAmount = Math.floor(Math.random() * 97067) + 38; // Random gain between 38 and 97104
+                    gameState.totalCoins += gainAmount;
+                    hackScreen.style.backgroundColor = '#000000'; // Black
+                    hackScreen.style.color = '#8DB600'; // Apple Green
+                    hackScreen.innerHTML = `${donor} got hacked`;
+                }
+
+                // Hide the screen after 3 seconds
+                setTimeout(() => {
+                    hackScreen.style.display = 'none';
+                }, 3000);
+
+                // Ensure UI is updated
+                if (typeof updateTotalCoinsDisplay === "function") updateTotalCoinsDisplay();
+            }
+
             gameState.lives = gameState.maxLives; // Set lives to max lives when starting level
             gameState.levelCoinsCollected = 0;
             gameState.gameRunning = false; // Will be set to true after announcement
@@ -2283,7 +2732,19 @@ const bgm = document.getElementById('bgm');
             // Show/hide timer based on crazy mode
             uiTimer.style.display = gameState.crazyMode ? 'none' : 'block';
 
-            // Resize canvas first to make sure ground level is correct
+            // Show game screen FIRST so it has a valid width/height
+            levelScreen.style.display = 'none';
+            document.getElementById('ui-buttons').style.display = 'flex';
+            canvas.style.display = 'block';
+            gameUI.style.display = 'flex';
+            gameOverScreen.style.display = 'none';
+            winScreen.style.display = 'none';
+            document.querySelector('.game-buttons').style.display = 'flex';
+
+            // Show touch controls only during gameplay
+            touchControls.style.display = 'flex';
+
+            // Now that canvas is visible, resize it to calculate ground level correctly
             resizeCanvas();
 
             // Reset player - now using correct ground level
@@ -2296,9 +2757,43 @@ const bgm = document.getElementById('bgm');
             player.facingRight = true;
             player.invulnerable = false;
             player.invulnerabilityTimer = 0;
+            gameState.autoMoveActive = false; // Reset auto-move on level start
 
-            // Generate level
+            // Generate level (using the correct ground level)
             generateLevel(levelNum);
+
+            // If it's a City Level (101-113), start the player directly on top of the first building!
+            if (levelNum >= 101 && levelNum <= 113) {
+                if (level.pillars.length > 0) {
+                    const firstPillar = level.pillars[0];
+                    player.x = firstPillar.x + (firstPillar.width / 2) - (player.width * player.sizeMultiplier / 2);
+                    player.y = firstPillar.y - player.height * player.sizeMultiplier;
+                }
+            }
+
+            // If player teleported backwards while riding a train, restore the train at the end of the level!
+            if (gameState.ridingTrainReverse) {
+                const rt = gameState.ridingTrainReverse;
+                const spawnX = level.levelWidth - rt.width - 50; // Spawn near the right edge
+
+                // Spawn the exact same train
+                level.trains.push({
+                    x: spawnX,
+                    y: level.groundLevel - rt.height,
+                    width: rt.width,
+                    height: rt.height,
+                    speed: rt.speed,
+                    direction: rt.direction,
+                    numCarriages: rt.numCarriages
+                });
+
+                // Place player firmly on top of it
+                player.x = spawnX + (rt.width / 2) - (player.width * player.sizeMultiplier / 2);
+                player.y = level.groundLevel - rt.height - player.height * player.sizeMultiplier;
+
+                // Clear the state so they don't spawn on a train next time they die/reset normally
+                gameState.ridingTrainReverse = null;
+            }
 
             // Update UI
             updateLivesUI();
@@ -2309,18 +2804,7 @@ const bgm = document.getElementById('bgm');
             updateShieldButton();
             updateMedicineButton();
             updateHeartButton();
-
-            // Show game screen
-            levelScreen.style.display = 'none';
-                document.getElementById('ui-buttons').style.display = 'flex';
-            canvas.style.display = 'block';
-            gameUI.style.display = 'flex';
-            gameOverScreen.style.display = 'none';
-            winScreen.style.display = 'none';
-            document.querySelector('.game-buttons').style.display = 'flex';
-            
-            // Show touch controls only during gameplay
-            touchControls.style.display = 'flex';
+            if(typeof updateTeleporterButton !== "undefined") updateTeleporterButton();
 
             // Show level announcement
             showLevelAnnouncement(levelNum);
@@ -2357,153 +2841,110 @@ const bgm = document.getElementById('bgm');
             level.lava = [];
             level.spikes = [];
             level.trains = [];
+            level.trainSpawnTimer = 0;
+            level.nextTrainFrames = Math.floor(60 * (6.87 + Math.random() * (8.56 - 6.87)));
             level.bricks = [];
             level.trams = [];
             level.bosses = [];
             level.coins = [];
-            level.hearts = []; // Clear level hearts
+            level.hearts = [];
+            level.npcs = []; // Clear NPCs
             level.key = null;
             level.bigCoin = null;
+            level.ice = [];
+            level.hailChunks = [];
             
             // Set level width
             level.levelWidth = 5000;
+
+            // Check weather for Snow (Index 3)
+            let weatherIndex = Math.floor((levelNum - 1) / 5) % 4; // 0=Clear, 1=Rain, 2=Wind, 3=Snow
+            if (levelNum >= 51 && levelNum <= 62) {
+                weatherIndex = -1; // Force NO weather in Galaxy levels
+            }
+            if (weatherIndex === 3) {
+                // Generate Ice Patches (6-10 patches based on sequence)
+                const iceSequence = [6,8,7,7,9,10,10,10,9,9,7,8,6,6,8,9,7,10,10,9,8,7,6,7,8,9,10,9,9,7,6,8,10,9,7,6,8,7,7,9,9,9,8,7,6,8,7,7,10,10,9];
+                const patchCount = Math.floor(Math.random() * 5) + 6; // 6 to 10 patches
+                let sequenceIdx = (levelNum * 7) % iceSequence.length;
+
+                for (let i = 0; i < patchCount; i++) {
+                    const carCount = iceSequence[sequenceIdx % iceSequence.length];
+                    sequenceIdx++;
+                    const iceWidth = carCount * 35; // 35 pixels per train car
+
+                    let iceX = 600 + Math.random() * (level.levelWidth - 1200);
+                    level.ice.push({
+                        x: iceX,
+                        y: level.groundLevel - 5, // Just below player feet
+                        width: iceWidth,
+                        height: 5
+                    });
+                }
+
+                // 50% chance for hail in snow levels
+                level.hasHail = Math.random() < 0.5;
+                level.hailSpawnTimer = 0;
+                // Interval is 17.394875167453834 seconds
+                level.hailIntervalFrames = Math.floor(17.394875167453834 * 60);
+            }
             
             // Generate pillars
             const pillarWidth = 80;
             const minHeight = 50;
             const maxHeight = 150;
             
-            for (let i = 0; i < config.numPillars; i++) {
+                        const cityStoreySchedule = [18,25,23,22,22,21,24,25,16,17,12,25,23,24,24,22,21,21,20,20,19,18,19,19,17,18,17,9,43,27];
+
+            // If it's a City level, use exactly 30 buildings to match the schedule and spread them out evenly
+            const actualNumPillars = (levelNum >= 101 && levelNum <= 113) ? cityStoreySchedule.length : config.numPillars;
+
+            // For City levels, we can expand the level width slightly to make it feel like a real city span
+            if (levelNum >= 101 && levelNum <= 113) {
+                level.levelWidth = 5000; // 30 pillars spread over 5000 width gives a nice ~150px spacing
+            }
+
+            for (let i = 0; i < actualNumPillars; i++) {
                 // Distribute pillars across level width
-                const x = 200 + (i * (level.levelWidth - 600) / config.numPillars);
-                const height = minHeight + Math.random() * (maxHeight - minHeight);
-                
+                const x = 200 + (i * (level.levelWidth - 600) / actualNumPillars);
+                let height = minHeight + Math.random() * (maxHeight - minHeight);
+                let storeys = null;
+
+                if (levelNum >= 101 && levelNum <= 113) {
+                    storeys = cityStoreySchedule[i % cityStoreySchedule.length];
+
+                    if (storeys === 9) {
+                        // The ONLY building low enough to jump on from the ground (100 pixels tall)
+                        height = 100; 
+                    } else {
+                        // All other buildings have a base height of 160, making them completely 
+                        // un-jumpable from the ground since the absolute max jump is ~144 pixels.
+                        height = 160 + (storeys * 1.5);
+                    }
+                }
+
                 level.pillars.push({
                     x,
                     y: level.groundLevel - height, // Using correct ground level
                     width: pillarWidth,
-                    height
+                    height,
+                    storeys
                 });
             }
             
-            // Generate lava pools
-            const lavaWidth = 200;
-            let attempts = 0;
-            for (let i = 0; i < config.lavaCount; i++) {
-                let lavaPosition = 0;
-                let isSafe = false;
-                attempts = 0;
-
-                while (!isSafe && attempts < 50) {
-                    lavaPosition = 800 + Math.random() * (level.levelWidth - 1600);
-                    isSafe = true;
-                    // Make sure lava doesn't overlap pillars too much
-                    for (const pillar of level.pillars) {
-                        if (Math.abs((lavaPosition + lavaWidth/2) - (pillar.x + pillar.width/2)) < (lavaWidth/2 + pillar.width/2 + 20)) {
-                            isSafe = false;
-                            break;
-                        }
-                    }
-                    attempts++;
-                }
-
-                level.lava.push({
-                    x: lavaPosition,
-                    y: level.groundLevel - 20, // Using correct ground level
-                    width: lavaWidth,
-                    height: 40,
-                    fireBubbles: Array.from({length: 5}, (_, i) => ({
-                        offsetX: Math.random() * lavaWidth,
-                        offsetY: Math.random() * 5,
-                        speed: 0.5 + Math.random() * 1.5
-                    }))
-                });
-            }
-
-            // Generate Spikes (10-16 per level)
-            const numSpikes = Math.floor(Math.random() * 7) + 10; // 10 to 16
-            for (let i = 0; i < numSpikes; i++) {
-                let spikeX = 0;
-                let isSafe = false;
-                attempts = 0;
-
-                while (!isSafe && attempts < 50) {
-                    spikeX = 400 + Math.random() * (level.levelWidth - 1000);
-                    isSafe = true;
-
-                    // Don't overlap with lava
-                    for (const lava of level.lava) {
-                        if (spikeX > lava.x - 40 && spikeX < lava.x + lava.width + 10) {
-                            isSafe = false;
-                            break;
-                        }
-                    }
-
-                    // Don't overlap with pillars too closely on the ground
-                    for (const pillar of level.pillars) {
-                        if (Math.abs(spikeX - pillar.x) < 50) {
-                            isSafe = false;
-                            break;
-                        }
-                    }
-                    attempts++;
-                }
-
-                level.spikes.push({
-                    x: spikeX,
-                    y: level.groundLevel - 25, // Placed on the ground
-                    width: 30,
-                    height: 25
-                });
-            }
-
-            // Initialize Train Spawner (Levels 8-16 only)
-            if (levelNum >= 8 && levelNum <= 16) {
-                level.trainSpawnTimer = 0;
-                level.nextTrainFrames = Math.floor(60 * (6.87 + Math.random() * (8.56 - 6.87)));
-            }
-
-            // Initialize Brick Spawner (Levels 1-7 and 17-100, or 17-125 in LEGENDARY MODE)
-            const legendaryMode = gameState.playerName.toLowerCase() === 'goldun';
-            const vvipMode = gameState.playerName.toLowerCase() === 'be';
-            const brickMaxLevel = legendaryMode ? 125 : 100;
-            if ((levelNum >= 1 && levelNum <= 7) || (levelNum >= 17 && levelNum <= brickMaxLevel)) {
-                level.brickSpawnTimer = 0;
-                level.nextBrickFrames = Math.floor(60 * (6.02 + Math.random() * (6.78 - 6.02)));
-            }
-
-            // Initialize Tram Spawner (Levels 1-23, or 1-31 in VVIP/LEGENDARY MODE)
-            const tramMaxLevel = (legendaryMode || vvipMode) ? 31 : 23;
-            if (levelNum >= 1 && levelNum <= tramMaxLevel) {
-                level.tramSpawnTimer = 0;
-                if (levelNum >= 8 && levelNum <= 16) {
-                    level.tramPending = false;
-                    level.tramPendingTimer = 0;
-                } else {
-                    level.nextTramFrames = Math.floor(60 * (3.0 + Math.random() * (4.22 - 3.0)));
-                }
-            }
-
-            // Initialize Boss Spawner (Levels 86-100)
-            if (levelNum >= 86 && levelNum <= 100) {
-                level.bossSpawnTimer = 0;
-                level.nextBossFrames = Math.floor(8.56 * 60); // 8.56 seconds
-            }
+                        // NPCs removed per request
 
             // Generate coins
             let coinCount = 0;
             const usedPillars = new Set();
 
-            // Phase 1: Put coins on random pillars (leave some empty for hearts)
             const shuffledPillars = [...level.pillars].map((p, i) => ({p, i})).sort(() => Math.random() - 0.5);
-            // Decide how many pillars to use for coins (at most 70% of pillars, so hearts have a chance)
-            const maxPillarsForCoins = Math.floor(level.pillars.length * 0.25);
+            const maxPillarsForCoins = Math.max(1, Math.floor(level.pillars.length * 0.25));
 
             for (let i = 0; i < maxPillarsForCoins && coinCount < config.coinCount; i++) {
                 const {p: pillar, i: originalIndex} = shuffledPillars[i];
-                const newX = pillar.x + Math.random() * (pillar.width - settings.coinSize);
+                const newX = pillar.x + Math.random() * Math.max(1, (pillar.width - settings.coinSize));
 
-                // Ensure this pillar coin isn't too close to an already placed coin
                 let tooClose = false;
                 for (const existingCoin of level.coins) {
                     if (Math.abs(newX - existingCoin.x) < 150) {
@@ -2528,24 +2969,22 @@ const bgm = document.getElementById('bgm');
 
             // Generate hearts in even-numbered levels
             if (config.heartCount > 0) {
-                // Use a different set of shuffled pillars for heart placement
                 const heartPillars = [...level.pillars].filter(p => !Array.from(usedPillars).some(i => level.pillars[i] === p));
                 heartPillars.sort(() => Math.random() - 0.5);
-                
+
                 for (let i = 0; i < Math.min(config.heartCount, heartPillars.length); i++) {
                     const pillar = heartPillars[i];
-                    
                     level.hearts.push({
-                        x: pillar.x + Math.random() * (pillar.width - settings.heartSize),
+                        x: pillar.x + Math.random() * Math.max(1, (pillar.width - settings.heartSize)),
                         y: pillar.y - settings.coinSize,
                         width: settings.heartSize,
                         height: settings.heartSize,
                         collected: false,
-                        floatOffset: Math.random() * Math.PI * 2 // Random floating offset
+                        floatOffset: Math.random() * Math.PI * 2
                     });
                 }
             }
-            
+
             // Generate end goal (key or big coin)
             if (config.endType === 'key') {
                 level.key = {
@@ -2611,11 +3050,27 @@ function updateGame() {
             if (keys.left) {
                 player.velocityX = -settings.moveSpeed;
                 player.facingRight = false;
-            } else if (keys.right) {
+            } else if (keys.right || gameState.autoMoveActive) {
                 player.velocityX = settings.moveSpeed;
                 player.facingRight = true;
             } else {
-                player.velocityX *= settings.friction;
+                // Check if player is on ice
+                let onIce = false;
+                if (level.ice && player.onGround) {
+                    for (const ice of level.ice) {
+                        if (player.x + player.width > ice.x && player.x < ice.x + ice.width && 
+                            Math.abs(player.y + player.height * player.sizeMultiplier - level.groundLevel) < 5) {
+                            onIce = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (onIce) {
+                    player.velocityX *= 0.98; // Slippery! Much less friction
+                } else {
+                    player.velocityX *= settings.friction;
+                }
             }
             
             // Handle continuous jumping (bunny hop) if button/key is held
@@ -2639,6 +3094,11 @@ function updateGame() {
             if (keys.heartPressed && (gameState.ownedHearts > 0 || gameState.crazyMode) && gameState.lives < gameState.maxLives) {
                 activateHeart();
                 keys.heartPressed = false;
+            }
+
+            if (keys.teleporterPressed && (gameState.ownedTeleporter > 0 || gameState.crazyMode)) {
+                activateTeleporter();
+                keys.teleporterPressed = false;
             }
             
             // Apply gravity
@@ -2724,6 +3184,51 @@ function updateGame() {
                 };
 
                 if (checkCollision(playerHitboxHazards, lavaHitbox)) {
+                    if (!player.invulnerable && !gameState.crazyMode) {
+                        // Apply clothing loss probabilities if equipped
+                        if (gameState.equippedAccessories) {
+                            let equipped = [];
+                            if (gameState.equippedAccessories.cap) equipped.push('cap');
+                            if (gameState.equippedAccessories.shirt) equipped.push('shirt');
+                            if (gameState.equippedAccessories.pants) equipped.push('pants');
+
+                            if (equipped.length > 0) {
+                                const rand = Math.random() * 100;
+                                let numToLose = 0;
+
+                                if (rand < 4.9) {
+                                    numToLose = 3; // Lose all (if they have that many)
+                                } else if (rand < 4.9 + 6.0) {
+                                    numToLose = 0; // Lose none
+                                } else if (rand < 4.9 + 6.0 + 32.1) {
+                                    numToLose = 2; // Lose two
+                                } else {
+                                    numToLose = 1; // Lose one (57% chance)
+                                }
+
+                                numToLose = Math.min(numToLose, equipped.length);
+
+                                // Randomly unequip them
+                                for (let i = 0; i < numToLose; i++) {
+                                    const index = Math.floor(Math.random() * equipped.length);
+                                    const itemToLose = equipped[index];
+                                    gameState.equippedAccessories[itemToLose] = false;
+                                    gameState.ownedAccessories[itemToLose] = false; // Also lose ownership
+                                    equipped.splice(index, 1);
+                                }
+
+                                // Update button UI if currently in menu
+                                document.querySelectorAll('.acc-btn').forEach(btn => {
+                                    const acc = btn.getAttribute('data-acc');
+                                    const costSpan = btn.querySelector('.acc-cost');
+                                    const cost = btn.getAttribute('data-cost');
+                                    if (!gameState.ownedAccessories[acc]) {
+                                        costSpan.textContent = '💷 ' + cost;
+                                    }
+                                });
+                            }
+                        }
+                    }
                     takeDamage(1);
                     break;
                 }
@@ -2761,22 +3266,39 @@ function updateGame() {
             }
 
             // Handle Train Spawning and Updating
-            if (gameState.currentLevel >= 8 && gameState.currentLevel <= 16) {
+            if (true) { // Trains on EVERY level
                 if (level.trainSpawnTimer !== undefined) {
                     level.trainSpawnTimer++;
                     if (level.trainSpawnTimer >= level.nextTrainFrames) {
-                        const carriages = gameState.trainSchedule[gameState.trainScheduleIndex % gameState.trainSchedule.length];
-                        gameState.trainScheduleIndex++;
-                        level.trains.push({
-                            x: settings.cameraOffset + canvas.width + 100,
-                            y: level.groundLevel - 35,
-                            width: carriages * 35,
-                            height: 35,
-                            speed: 5 + Math.random() * 2,
-                            numCarriages: carriages
-                        });
-                        level.trainSpawnTimer = 0;
-                        level.nextTrainFrames = Math.floor(60 * (6.87 + Math.random() * (8.56 - 6.87)));
+
+                        // Check if boss train level
+                        if (gameState.currentLevel >= 120 && gameState.currentLevel <= 125) {
+                            level.trains.push({
+                                x: settings.cameraOffset + canvas.width + 100,
+                                y: level.groundLevel - 35,
+                                width: 124 * 35,
+                                height: 35,
+                                speed: 5,
+                                numCarriages: 124,
+                                isBossTrain: true
+                            });
+                            level.trainSpawnTimer = 0;
+                            level.nextTrainFrames = Math.floor(60 * 15); // Long cooldown for boss trains
+                        } else {
+                            // Normal train
+                            const carriages = gameState.trainSchedule[gameState.trainScheduleIndex % gameState.trainSchedule.length];
+                            gameState.trainScheduleIndex++;
+                            level.trains.push({
+                                x: settings.cameraOffset + canvas.width + 100,
+                                y: level.groundLevel - 35,
+                                width: carriages * 35,
+                                height: 35,
+                                speed: 5 + Math.random() * 2,
+                                numCarriages: carriages
+                            });
+                            level.trainSpawnTimer = 0;
+                            level.nextTrainFrames = Math.floor(60 * (6.87 + Math.random() * (8.56 - 6.87)));
+                        }
 
                         if (level.tramSpawnTimer !== undefined) {
                             level.tramPending = true;
@@ -2794,14 +3316,52 @@ function updateGame() {
                     continue;
                 }
                 const trainHitbox = { x: train.x + 10, y: train.y + 5, width: train.width - 20, height: train.height - 5 };
+
                 if (checkCollision(playerHitboxHazards, trainHitbox)) {
-                    if (!gameState.crazyMode) {
-                        playSound(trainHornSound); // play beeeeepp
-                        player.invulnerable = false;
-                        gameState.shieldActive = false;
-                        takeDamage(999, true); // True to skip normal death sounds
+                    // Check if player landed on top of the train or is already riding it
+                    const isFallingOrRiding = player.velocityY >= 0;
+                    // If they were above it last frame, OR if they are perfectly resting on it right now
+                    const wasAbove = (player.y + player.height * player.sizeMultiplier - player.velocityY) <= trainHitbox.y + 15;
+
+                    if (isFallingOrRiding && wasAbove) {
+                        // Landed on train! Ride it.
+                        player.y = trainHitbox.y - player.height * player.sizeMultiplier;
+                        player.velocityY = 0;
+                        player.onGround = true;
+                        player.jumping = false;
+                        // Inherit train velocity EXACTLY (ignore player's own movement input while riding)
+                        player.x -= player.velocityX; // Cancel out any left/right keys the player pressed this frame
+                        player.x -= train.speed; // Lock perfectly to the train's speed
+
+                        // Check if hitting level borders while riding
+                        if (player.x <= 0 || player.x + player.width * player.sizeMultiplier >= level.levelWidth) {
+                            if (gameState.currentLevel > 1) {
+                                // Teleport to previous level but KEEP the train!
+                                gameState.ridingTrainReverse = {
+                                    speed: train.speed,
+                                    width: train.width,
+                                    height: train.height,
+                                    numCarriages: train.numCarriages,
+                                    direction: train.direction
+                                };
+                                gameState.currentLevel--;
+                                startLevel(gameState.currentLevel);
+                                return; // Stop updating this frame to prevent errors
+                            } else {
+                                // Hit level 1 border while riding = Die
+                                takeDamage(999, true);
+                            }
+                        }
+                    } else {
+                        // Hit from side or bottom = Normal death
+                        if (!gameState.crazyMode) {
+                            playSound(trainHornSound); // play beeeeepp
+                            player.invulnerable = false;
+                            gameState.shieldActive = false;
+                            takeDamage(999, true); // True to skip normal death sounds
+                        }
                     }
-                    break;
+                    if (!isFallingOrRiding || !wasAbove) break;
                 }
             }
 
@@ -2852,7 +3412,7 @@ function updateGame() {
             for (let i = level.trams.length - 1; i >= 0; i--) {
                 const tram = level.trams[i];
 
-                // Calculate 12.23 pillars distance dynamically
+                // Calculate vg1.8.13 pillars distance dynamically
                 let pillarDistance = 300; // Default fallback
                 if (level.pillars.length > 1) {
                     pillarDistance = level.pillars[1].x - level.pillars[0].x;
@@ -2945,6 +3505,53 @@ function updateGame() {
                 }
             }
 
+            // Handle Hail Spawning and Updating
+            if (level.hasHail && level.hailSpawnTimer !== undefined) {
+                level.hailSpawnTimer++;
+                if (level.hailSpawnTimer >= level.hailIntervalFrames) {
+                    level.hailSpawnTimer = 0;
+                    // Spawn a volley of hail across the screen!
+                    for (let i = 0; i < 5; i++) {
+                        const hailX = settings.cameraOffset + Math.random() * canvas.width;
+                        level.hailChunks.push({
+                            x: hailX,
+                            y: -100 - Math.random() * 200, // Starts above screen, staggered
+                            width: 40,
+                            height: 40,
+                            velocityY: 6 + Math.random() * 4 // Falls fast
+                        });
+                    }
+                }
+            }
+
+            for (let i = level.hailChunks.length - 1; i >= 0; i--) {
+                const hail = level.hailChunks[i];
+                hail.y += hail.velocityY;
+
+                // Remove if it falls below ground
+                if (hail.y > level.groundLevel + 50) {
+                    level.hailChunks.splice(i, 1);
+                    continue;
+                }
+
+                // Check collision
+                const hailHitbox = { x: hail.x + 5, y: hail.y + 5, width: hail.width - 10, height: hail.height - 10 };
+                if (checkCollision(playerHitboxHazards, hailHitbox)) {
+                    if (!gameState.crazyMode) {
+                        if (gameState.shieldActive) {
+                            gameState.shieldActive = false;
+                            player.invulnerable = true;
+                            player.invulnerabilityTimer = 60;
+                            playSound(shieldSound);
+                            updateShieldButton();
+                        } else {
+                            takeDamage(1);
+                        }
+                        level.hailChunks.splice(i, 1);
+                    }
+                }
+            }
+
             // Handle Boss Spawning and Updating (Falling from sky)
             if (gameState.currentLevel >= 86 && gameState.currentLevel <= 100 && level.bossSpawnTimer !== undefined) {
                 level.bossSpawnTimer++;
@@ -3033,6 +3640,7 @@ function updateGame() {
                         }
                         
                         updateHeartButton();
+            if(typeof updateTeleporterButton !== "undefined") updateTeleporterButton();
                         playSound(heartSound);
                     }
                 }
@@ -3094,6 +3702,8 @@ function updateGame() {
                 }
             }
             
+            
+            // NPCs removed per request
             // Update camera offset based on player's size
             const playerCenter = player.x + (player.width * player.sizeMultiplier) / 2;
             settings.cameraOffset = Math.max(0, playerCenter - canvas.width / 2);
@@ -3119,6 +3729,7 @@ function updateGame() {
                 if (gameState.lives < gameState.maxLives && gameState.ownedHearts === 0) {
                     gameState.ownedHearts = 1;
                     updateHeartButton();
+            if(typeof updateTeleporterButton !== "undefined") updateTeleporterButton();
                 }
             }
         }
@@ -3131,6 +3742,14 @@ function updateGame() {
                     sky: 'linear-gradient(to bottom, #8fd3ff 0%, #dff5ff 100%)',
                     ground: '#88c057', groundDark: '#5f8d3d', pillar: '#c78752', pillarDark: '#8e5e37',
                     overlay: 'radial-gradient(circle at 12% 18%, rgba(255,255,255,0.35) 0 70px, transparent 72px), radial-gradient(circle at 85% 20%, rgba(255,255,255,0.9) 0 18px, transparent 20px), radial-gradient(circle at 90% 24%, rgba(255,255,255,0.9) 0 24px, transparent 26px), linear-gradient(to top, rgba(106,168,79,0.25), rgba(0,0,0,0))'
+                };
+            }
+            if (levelNum >= 101 && levelNum <= 113) {
+                return {
+                    name: 'City style',
+                    sky: 'linear-gradient(to bottom, #9ed0ff 0%, #eef7ff 55%, #dfe9f7 100%)',
+                    ground: '#7f8791', groundDark: '#4f5660', pillar: '#aeb7c2', pillarDark: '#6d7682',
+                    overlay: 'linear-gradient(to top, rgba(180,200,220,0.18), rgba(0,0,0,0)), repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 28px, rgba(0,0,0,0.03) 28px 56px)'
                 };
             }
             if (levelNum >= 9 && levelNum <= 17) {
@@ -3235,23 +3854,133 @@ function drawGame() {
             if (themeOverlay) {
                 themeOverlay.style.background = theme.overlay;
             }
-            if (themeBadge) {
-                themeBadge.textContent = theme.name;
-            }
 
             // Clear canvas
             ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (themeBadge) {
+                const seasons = ['🌸 Spring', '☀️ Summer', '🍂 Autumn', '❄️ Winter'];
+                const weathers = ['Clear', 'Rain', 'Breezy', 'Snow'];
+                const sIdx = Math.floor((gameState.currentLevel - 1) / 25) % 4;
+                const wIdx = Math.floor((gameState.currentLevel - 1) / 5) % 4;
+                if (gameState.currentLevel >= 51 && gameState.currentLevel <= 62) {
+                    themeBadge.textContent = `${theme.name} | 🌌 Deep Space`;
+                } else {
+                    themeBadge.textContent = `${theme.name} | ${seasons[sIdx]} - ${weathers[wIdx]}`;
+                }
+            }
+
+            // Generate Weather Particles
+            if (typeof gameState.particles === 'undefined') gameState.particles = [];
+
+            const seasonIndex = Math.floor((gameState.currentLevel - 1) / 25) % 4; // 0=Spring, 1=Summer, 2=Autumn, 3=Winter
+            let weatherIndex = Math.floor((gameState.currentLevel - 1) / 5) % 4; // 0=Clear, 1=Rain, 2=Wind, 3=Snow
+
+            // Force NO weather in Galaxy levels (51-62)
+            if (gameState.currentLevel >= 51 && gameState.currentLevel <= 62) {
+                weatherIndex = -1; // -1 means no weather
+            }
+
+            // We'll set weather based on level directly to ensure every level has something cool
+            let maxParticles = 0;
+            let pType = 'none';
+            if (weatherIndex === 0) { maxParticles = 25; pType = 'leaf'; } // Default "clear" is now breezy so we always see something
+            if (weatherIndex === 1) { maxParticles = 100; pType = 'rain'; }
+            if (weatherIndex === 2) { maxParticles = 40; pType = 'leaf'; } // Very breezy
+            if (weatherIndex === 3) { maxParticles = 80; pType = 'snow'; }
+
+            if (seasonIndex === 0 && pType === 'leaf') pType = 'petal'; // Spring petals
+
+            if (pType !== 'none' && gameState.particles.length < maxParticles) {
+                if (Math.random() < 0.3) {
+                    gameState.particles.push({
+                        x: Math.random() * canvas.width,
+                        y: -20,
+                        vx: (pType === 'wind' || pType === 'leaf' || pType === 'petal') ? 2 + Math.random() * 3 : (Math.random() * 1 - 0.5),
+                        vy: pType === 'rain' ? 10 + Math.random() * 5 : 2 + Math.random() * 3,
+                        size: pType === 'rain' ? Math.random() * 2 + 1 : Math.random() * 3 + 2,
+                        type: pType,
+                        rot: Math.random() * Math.PI * 2,
+                        rotSpeed: (Math.random() - 0.5) * 0.1
+                    });
+                }
+            }
+
 
             // Draw ground
             ctx.fillStyle = isDarkMode() ? theme.groundDark : theme.ground;
             ctx.fillRect(0, level.groundLevel, canvas.width, canvas.height - level.groundLevel);
+
+            // Draw ice patches
+            if (level.ice && level.ice.length > 0) {
+                ctx.fillStyle = 'rgba(200, 240, 255, 0.8)';
+                for (const ice of level.ice) {
+                    const drawX = ice.x - settings.cameraOffset;
+                    if (drawX + ice.width > 0 && drawX < canvas.width) {
+                        ctx.fillRect(drawX, level.groundLevel, ice.width, ice.height + 15);
+
+                        // Add some glint/shine lines
+                        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
+                        ctx.fillRect(drawX + 10, level.groundLevel + 2, ice.width * 0.8, 2);
+                        ctx.fillStyle = 'rgba(200, 240, 255, 0.8)'; // Reset
+                    }
+                }
+            }
 
             // Draw pillars
             for (const pillar of level.pillars) {
                 if (pillar.x + pillar.width >= settings.cameraOffset && 
                     pillar.x <= settings.cameraOffset + canvas.width) {
                     const px = pillar.x - settings.cameraOffset;
-                    if (gameState.currentLevel >= 9 && gameState.currentLevel <= 17) {
+                    if (gameState.currentLevel >= 101 && gameState.currentLevel <= 113) {
+                        const towerColors = isDarkMode()
+                            ? ['#54606c', '#45515d', '#607080', '#4e5a66']
+                            : ['#b8c4d0', '#aebdcb', '#c7d2dc', '#9fb0c0'];
+
+                        const bodyColor = towerColors[Math.abs(Math.floor(pillar.x / 80)) % towerColors.length];
+                        const edgeColor = isDarkMode() ? '#dfe6ee' : '#f8fbff';
+                        const windowOn = isDarkMode() ? '#ffd86b' : '#dff4ff';
+                        const windowOff = isDarkMode() ? '#25313c' : '#7ea0ba';
+
+                        const w = pillar.width;
+                        const topY = pillar.y;
+                        const bottomY = level.groundLevel;
+                        const totalH = Math.max(80, bottomY - topY);
+                        const crownH = 10;
+                        const bodyY = topY + crownH;
+                        const bodyH = totalH - crownH;
+
+                        ctx.fillStyle = bodyColor;
+                        ctx.fillRect(px, bodyY, w, bodyH);
+
+                        ctx.fillStyle = isDarkMode() ? '#39434d' : '#8c99a6';
+                        ctx.fillRect(px - 1, topY, w + 2, crownH + 2);
+
+                        ctx.strokeStyle = edgeColor;
+                        ctx.lineWidth = 2;
+                        ctx.strokeRect(px + 1, bodyY + 1, w - 2, bodyH - 2);
+
+                        const floors = pillar.storeys || Math.max(8, Math.floor((bodyH - 20) / 16));
+                        const cols = 3;
+                        const winW = 10;
+                        const xGap = (w - cols * winW) / (cols + 1);
+                        // Allow floor gaps to shrink so 43 storeys can fit in the squished height
+                        const floorGap = bodyH / Math.max(1, floors);
+                        const winH = Math.min(8, floorGap * 0.75); // Scale windows down so they don't overlap
+
+                        for (let row = 0; row < floors; row++) {
+                            const wy = bodyY + (floorGap * 0.1) + row * floorGap;
+                            if (wy + winH > bodyY + bodyH - 18) break;
+
+                            for (let col = 0; col < cols; col++) {
+                                const wx = px + xGap + col * (winW + xGap);
+                                ctx.fillStyle = ((row + col + Math.floor(pillar.x / 40)) % 4 === 0) ? windowOff : windowOn;
+                                ctx.fillRect(wx, wy, winW, winH);
+                            }
+                        }
+
+                        ctx.fillStyle = isDarkMode() ? '#263238' : '#5b6670';
+                        ctx.fillRect(px + w * 0.35, bodyY + bodyH - 18, w * 0.3, 18);
+                    } else if (gameState.currentLevel >= 9 && gameState.currentLevel <= 17) {
                         const buildingColors = isDarkMode()
                             ? ['#8d6e63', '#607d8b', '#6d7d46', '#7b5e57']
                             : ['#d7a86e', '#9ec1cf', '#b8cf8a', '#d8b4a0'];
@@ -3325,6 +4054,22 @@ function drawGame() {
                     } else {
                         ctx.fillStyle = isDarkMode() ? theme.pillarDark : theme.pillar;
                         ctx.fillRect(px, pillar.y, pillar.width, pillar.height);
+                    }
+
+                    // Snow overlay for top 321 pixels
+                    if (weatherIndex === 3) { // 3 = Snow
+                        const snowH = Math.min(321, pillar.height);
+                        ctx.fillStyle = '#FFFFFF';
+                        ctx.fillRect(px, pillar.y, pillar.width, snowH);
+
+                        // Add some small icicles for visual flair
+                        ctx.beginPath();
+                        for(let i=0; i<pillar.width; i+=10) {
+                            ctx.moveTo(px + i, pillar.y + snowH);
+                            ctx.lineTo(px + i + 5, pillar.y + snowH + (Math.sin(pillar.x + i) * 5 + 5));
+                            ctx.lineTo(px + i + 10, pillar.y + snowH);
+                        }
+                        ctx.fill();
                     }
                 }
             }
@@ -3409,7 +4154,16 @@ function drawGame() {
                     ctx.font = '35px Arial';
                     ctx.textAlign = 'left';
                     ctx.textBaseline = 'bottom';
-                    const trainStr = train.numCarriages === 8 ? '🚃🚃🚃🚃🚃🚃🚋🚃' : '🚃'.repeat(train.numCarriages);
+
+                    let trainStr = '';
+                    if (train.numCarriages >= 12) {
+                        trainStr = '🚄' + '🚃'.repeat(train.numCarriages - 1);
+                    } else if (train.numCarriages === 8) {
+                        trainStr = '🚃🚃🚃🚃🚃🚃🚋🚃';
+                    } else {
+                        trainStr = '🚃'.repeat(train.numCarriages);
+                    }
+
                     ctx.fillText(trainStr, train.x - settings.cameraOffset, train.y + train.height + 6);
                 }
             }
@@ -3423,6 +4177,17 @@ function drawGame() {
                     ctx.textBaseline = 'bottom';
                     const tramText = tram.isLong ? '🚋🚋🚋' : '🚋🚋';
                     ctx.fillText(tramText, tram.x - settings.cameraOffset, tram.y + tram.height + 6);
+                }
+            }
+
+            // Draw Hail
+            for (const hail of level.hailChunks) {
+                if (hail.x + hail.width >= settings.cameraOffset && 
+                    hail.x <= settings.cameraOffset + canvas.width) {
+                    ctx.font = '40px Arial';
+                    ctx.textAlign = 'left';
+                    ctx.textBaseline = 'top';
+                    ctx.fillText('🧊', hail.x - settings.cameraOffset, hail.y);
                 }
             }
 
@@ -3448,6 +4213,7 @@ function drawGame() {
                 }
             }
 
+            // NPCs removed per request
             // Draw coins - now with horizontal spin
             for (const coin of level.coins) {
                 if (!coin.collected && 
@@ -3597,6 +4363,13 @@ function drawGame() {
                     ctx.font = `${40 * player.sizeMultiplier}px "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", Arial`;
                     ctx.textAlign = 'center';
                     ctx.textBaseline = 'middle';
+
+                    // Prevent chess pieces from turning gold in legendary mode
+                    const isChessPiece = ['♟️', '♞', '♝', '♜', '♛', '♚'].includes(playerCustomEmoji);
+                    if (isChessPiece) {
+                        ctx.fillStyle = '#000000'; // Draw them in solid black
+                    }
+
                     ctx.fillText(playerCustomEmoji, 0, -scaledHeight * 0.1);
                     ctx.restore();
                 } else {
@@ -3607,21 +4380,31 @@ function drawGame() {
 
                 ctx.lineWidth = 2 * player.sizeMultiplier;
 
+                // Helper to create metallic canvas gradients
+                const getMetalGradient = (hex, yTop, yBot) => {
+                    const grad = ctx.createLinearGradient(0, yTop, 0, yBot);
+                    if (hex === '#FFD700') { grad.addColorStop(0, '#FFDF00'); grad.addColorStop(0.5, '#D4AF37'); grad.addColorStop(1, '#996515'); }
+                    else if (hex === '#C0C0C0') { grad.addColorStop(0, '#E5E4E2'); grad.addColorStop(0.5, '#C0C0C0'); grad.addColorStop(1, '#808080'); }
+                    else if (hex === '#CD7F32') { grad.addColorStop(0, '#CD7F32'); grad.addColorStop(0.5, '#A0522D'); grad.addColorStop(1, '#613613'); }
+                    else { return hex; }
+                    return grad;
+                };
+
                 // Head
-                ctx.fillStyle = c1;
+                ctx.fillStyle = getMetalGradient(c1, -scaledHeight * 0.33 - headRadius, -scaledHeight * 0.33 + headRadius);
                 ctx.beginPath();
                 ctx.arc(0, -scaledHeight * 0.33, headRadius, 0, Math.PI * 2);
                 ctx.fill();
 
                 // Body
-                ctx.strokeStyle = c1;
+                ctx.strokeStyle = getMetalGradient(c1, -scaledHeight * 0.15, scaledHeight * 0.18);
                 ctx.beginPath();
                 ctx.moveTo(0, -scaledHeight * 0.15);
                 ctx.lineTo(0, scaledHeight * 0.18);
                 ctx.stroke();
 
                 // Arms
-                ctx.strokeStyle = c2;
+                ctx.strokeStyle = getMetalGradient(c2, -scaledHeight * 0.03, scaledHeight * 0.18);
                 const leftArmAngle = Math.PI + armSwing;
                 const rightArmAngle = -armSwing;
                 ctx.beginPath();
@@ -3654,10 +4437,163 @@ function drawGame() {
                 ctx.beginPath();
                 ctx.arc(eyeOffsetX, -scaledHeight * 0.36, 2 * player.sizeMultiplier, 0, Math.PI * 2);
                 ctx.fill();
+
+                // Draw Accessories
+                if (gameState.equippedAccessories) {
+                    ctx.font = `${20 * player.sizeMultiplier}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+
+                    if (gameState.equippedAccessories.cap) {
+                        ctx.fillStyle = '#E91E63'; // Pinkish-red cap
+                        ctx.strokeStyle = '#C2185B';
+                        ctx.lineWidth = 1.5 * player.sizeMultiplier;
+
+                        const headY = -scaledHeight * 0.33;
+                        const hatBaseY = headY - headRadius * 0.2;
+
+                        // Hat dome
+                        ctx.beginPath();
+                        ctx.arc(0, hatBaseY, headRadius * 1.05, Math.PI, 0); // semi-circle on top of head
+                        ctx.fill();
+                        ctx.stroke();
+
+                        // Hat brim
+                        ctx.beginPath();
+                        ctx.lineCap = 'round';
+                        ctx.lineWidth = 3 * player.sizeMultiplier;
+                        if (player.facingRight) {
+                            ctx.moveTo(-headRadius, hatBaseY);
+                            ctx.lineTo(headRadius * 1.8, hatBaseY);
+                        } else {
+                            ctx.moveTo(headRadius, hatBaseY);
+                            ctx.lineTo(-headRadius * 1.8, hatBaseY);
+                        }
+                        ctx.stroke();
+                    }
+                    if (gameState.equippedAccessories.shirt) {
+                        ctx.strokeStyle = '#03A9F4'; // T-shirt light blue
+                        ctx.lineWidth = 6 * player.sizeMultiplier; 
+                        ctx.lineCap = 'round';
+                        ctx.beginPath();
+                        // Torso
+                        ctx.moveTo(0, -scaledHeight * 0.15);
+                        ctx.lineTo(0, scaledHeight * 0.10); // Shirt ends above hips
+                        ctx.stroke();
+                        // Sleeves (half arms)
+                        ctx.beginPath();
+                        ctx.moveTo(0, shoulderY);
+                        ctx.lineTo(Math.cos(leftArmAngle) * limbLength * 0.5, shoulderY + Math.sin(leftArmAngle) * limbLength * 0.5);
+                        ctx.moveTo(0, shoulderY);
+                        ctx.lineTo(Math.cos(rightArmAngle) * limbLength * 0.5, shoulderY + Math.sin(rightArmAngle) * limbLength * 0.5);
+                        ctx.stroke();
+                    }
+                    if (gameState.equippedAccessories.pants) {
+                        ctx.strokeStyle = '#3F51B5'; // Jeans blue
+                        ctx.lineWidth = 6 * player.sizeMultiplier;
+                        ctx.lineCap = 'round';
+                        // Pelvis part
+                        ctx.beginPath();
+                        ctx.moveTo(0, scaledHeight * 0.08);
+                        ctx.lineTo(0, hipY); 
+                        ctx.stroke();
+                        // Pants legs (full length)
+                        ctx.beginPath();
+                        ctx.moveTo(0, hipY);
+                        if (player.jumping) {
+                            ctx.lineTo(-legLength, hipY + legLength);
+                            ctx.moveTo(0, hipY);
+                            ctx.lineTo(legLength, hipY + legLength);
+                        } else if (moving) {
+                            ctx.lineTo(-legLength, hipY + legLength + legSwing);
+                            ctx.moveTo(0, hipY);
+                            ctx.lineTo(legLength, hipY + legLength - legSwing);
+                        } else {
+                            ctx.lineTo(-legLength, hipY + legLength);
+                            ctx.moveTo(0, hipY);
+                            ctx.lineTo(legLength, hipY + legLength);
+                        }
+                        ctx.stroke();
+                    }
+                }
+
                 ctx.restore();
                 }
             }
 
+            // Render Weather Particles on top of the world
+            const sIdx = Math.floor((gameState.currentLevel - 1) / 25) % 4; // Needed because seasonIndex isn't in this scope if defined at top
+            for (let i = gameState.particles.length - 1; i >= 0; i--) {
+                const p = gameState.particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.rot += p.rotSpeed;
+
+                if (p.x > canvas.width + 50 || p.x < -50 || p.y > canvas.height + 50) {
+                    gameState.particles.splice(i, 1);
+                    continue;
+                }
+
+                ctx.save();
+                ctx.translate(p.x, p.y);
+                ctx.rotate(p.rot);
+
+                if (p.type === 'rain') {
+                    ctx.fillStyle = 'rgba(150, 200, 255, 0.6)';
+                    ctx.fillRect(0, 0, p.size, p.size * 5);
+                } else if (p.type === 'snow') {
+                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, p.size, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (p.type === 'leaf') {
+                    ctx.fillStyle = (sIdx === 2) ? '#ff9800' : '#4caf50'; // Autumn leaves or summer leaves
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, p.size * 2, p.size, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                } else if (p.type === 'petal') {
+                    ctx.fillStyle = '#f48fb1'; // Pink petals
+                    ctx.beginPath();
+                    ctx.ellipse(0, 0, p.size * 1.5, p.size, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                ctx.restore();
+            }
+
+        }
+
+        
+        // Web Audio API for custom chord
+        let audioCtx = null;
+        function playACEA() {
+            if (!soundEnabled) return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+
+                const now = audioCtx.currentTime;
+                // A4, C#5, E5, A5 frequencies (A Major Chord)
+                const freqs = [440.00, 554.37, 659.25, 880.00]; 
+
+                freqs.forEach((freq, i) => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+
+                    osc.type = 'sine';
+                    osc.frequency.value = freq;
+
+                    // Simple envelope
+                    gain.gain.setValueAtTime(0, now + i * 0.1);
+                    gain.gain.linearRampToValueAtTime(0.3, now + i * 0.1 + 0.05);
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.1 + 0.5);
+
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+
+                    osc.start(now + i * 0.1);
+                    osc.stop(now + i * 0.1 + 0.6);
+                });
+            } catch(e) { console.log("Audio API failed", e); }
         }
 
         // Helper function to check collision between two rectangles
@@ -3705,6 +4641,7 @@ function drawGame() {
             
             // Update heart button state
             updateHeartButton();
+            if(typeof updateTeleporterButton !== "undefined") updateTeleporterButton();
         }
 
         // Update the max lives UI
@@ -3730,11 +4667,40 @@ function drawGame() {
         // Update total coins display
         function updateTotalCoinsDisplay() {
             totalCoinsDisplay.textContent = gameState.totalCoins;
+            updateShopButtonsState();
+        }
+
+        function updateShopButtonsState() {
+            if (gameState.crazyMode) return; // Crazy mode can buy everything indefinitely
+
+            // Check Protector (Cost: 2)
+            if (buyProtectorBtn) {
+                buyProtectorBtn.disabled = (gameState.totalCoins < 2 || gameState.protectorStock <= 0);
+            }
+
+            // Check Medicine (Cost: 5)
+            if (buyMedicineBtn) {
+                buyMedicineBtn.disabled = (gameState.totalCoins < 5 || gameState.medicineStock <= 0);
+            }
+
+            // Check Heart (Cost: 100)
+            if (buyHeartBtn) {
+                buyHeartBtn.disabled = (gameState.totalCoins < 100 || gameState.heartStock <= 0);
+            }
+
+            // Check Teleporter (Cost: 15)
+            if (buyTeleporterBtn) {
+                buyTeleporterBtn.disabled = (gameState.totalCoins < 15 || gameState.teleporterStock <= 0);
+            }
         }
 
         // Handle level completion
         function levelComplete() {
             gameState.gameRunning = false;
+            gameState.consecutiveDeaths = 0;
+
+            if (typeof gameState.consecutiveWins === 'undefined') gameState.consecutiveWins = 0;
+            gameState.consecutiveWins++;
             
             // Stop timer
             if (gameState.timerInterval) {
@@ -3764,14 +4730,30 @@ function drawGame() {
             touchControls.style.display = 'none';
             
             // Hide game buttons
+                        // Hide game buttons
             document.querySelector('.game-buttons').style.display = 'none';
-            
+
             winScreen.style.display = 'flex';
+
+            // Show gift button if 5 wins in a row
+            if (gameState.consecutiveWins >= 5) {
+                giftBtn.style.display = 'block';
+            } else {
+                giftBtn.style.display = 'none';
+            }
+
+            // Show crown button if completing level 125
+            if (gameState.currentLevel === 125) {
+                crownBtn.style.display = 'block';
+            } else {
+                crownBtn.style.display = 'none';
+            }
         }
 
         // Handle game over
         function gameOver() {
             gameState.gameRunning = false;
+            gameState.consecutiveWins = 0;
             
             // Reset medicine effect if active
             gameState.medicineActive = false;
@@ -3806,13 +4788,37 @@ function drawGame() {
             
             // Hide game buttons
             document.querySelector('.game-buttons').style.display = 'none';
-            
+
+            // Track deaths for dynamic button text
+            if (typeof gameState.consecutiveDeaths === 'undefined') gameState.consecutiveDeaths = 0;
+            gameState.consecutiveDeaths++;
+
+            if (gameState.consecutiveDeaths === 2) {
+                tryAgainBtn.style.display = 'block';
+                tryAgainBtn.textContent = 'THIRD TIME LUCKY?';
+                gameOverMessage.textContent = "You ran out of lives!";
+                retryBtn.textContent = "RETURN TO LEVEL SELECTION";
+            } else if (gameState.consecutiveDeaths >= 3) {
+                tryAgainBtn.style.display = 'none';
+                gameOverMessage.textContent = "AWW, TOO BAD, BUT IT BACK TO THE LEVEL SELECTION.";
+                retryBtn.textContent = "RETURN TO LEVEL SELECTION";
+            } else {
+                tryAgainBtn.style.display = 'block';
+                tryAgainBtn.textContent = 'TRY AGAIN';
+                gameOverMessage.textContent = "You ran out of lives!";
+                retryBtn.textContent = "RETURN TO LEVEL SELECTION";
+            }
+
             gameOverScreen.style.display = 'flex';
         }
 
         // Handle winning the game (final level)
         function gameWon() {
             gameState.gameRunning = false;
+            gameState.consecutiveDeaths = 0;
+
+            if (typeof gameState.consecutiveWins === 'undefined') gameState.consecutiveWins = 0;
+            gameState.consecutiveWins++;
             
             // Stop timer
             if (gameState.timerInterval) {
@@ -3852,14 +4858,31 @@ function drawGame() {
             touchControls.style.display = 'none';
             
             // Hide game buttons
+                        // Hide game buttons
             document.querySelector('.game-buttons').style.display = 'none';
-            
+
             winScreen.style.display = 'flex';
+
+            // Show gift button if 5 wins in a row
+            if (gameState.consecutiveWins >= 5) {
+                giftBtn.style.display = 'block';
+            } else {
+                giftBtn.style.display = 'none';
+            }
+
+            // Show crown button if completing level 125
+            if (gameState.currentLevel === 125) {
+                crownBtn.style.display = 'block';
+            } else {
+                crownBtn.style.display = 'none';
+            }
         }
 
         // Return to level selection screen
         function returnToLevelSelection() {
             gameState.gameRunning = false;
+            gameState.consecutiveDeaths = 0;
+            gameState.consecutiveWins = 0;
             document.getElementById('ui-buttons').style.display = 'none';
             
             // Reset medicine effect if active
@@ -3931,7 +4954,9 @@ function drawGame() {
                 silentSound.play().catch(e => console.log("Enabling audio failed:", e));
                 document.removeEventListener('click', initAudio);
             }, {once: true});
-        });
+        
+
+});
     </script>
 </body>
 </html>
